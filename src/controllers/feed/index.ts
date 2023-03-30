@@ -159,7 +159,8 @@ router.post('/img', upload.single("file"), async (req: Request, res: Response) =
 });
 router.get('/uploads/feed/:filename', (req: Request, res: Response) => {
     const { filename } = req.params;
-    const filePath = path.join(__dirname, 'uploads', 'feed', filename);
+    const filePath = path.join(process.cwd(), 'uploads', 'feed', filename);
     res.sendFile(filePath);
-  });
+});
+  
 export default router

@@ -8,6 +8,7 @@ const index_1 = __importDefault(require("../../models/feed/index"));
 const index_2 = __importDefault(require("../../models/feed/index"));
 const index_3 = __importDefault(require("../../models/users/index"));
 const multer_1 = require("../../config/multer");
+const path_1 = __importDefault(require("path"));
 const router = express_1.default.Router();
 // Create post
 router.post('/post/create/:id', multer_1.upload.single("image"), async (req, res) => {
@@ -150,6 +151,11 @@ router.post('/img', multer_1.upload.single("file"), async (req, res) => {
     catch (err) {
         res.status(500).json({ message: "Erro ao salvar a imagem." });
     }
+});
+router.get('/uploads/feed/:filename', (req, res) => {
+    const { filename } = req.params;
+    const filePath = path_1.default.join(process.cwd(), 'uploads', 'feed', filename);
+    res.sendFile(filePath);
 });
 exports.default = router;
 //# sourceMappingURL=index.js.map
