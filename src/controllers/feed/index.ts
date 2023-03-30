@@ -157,7 +157,7 @@ router.post('/img', upload.single("file"), async (req: Request, res: Response) =
         res.status(500).json({ message: "Erro ao salvar a imagem." });
     }
 });
-router.get('/uploads/:filename', (req: Request, res: Response) => {
+router.get('/uploads/feed/:filename', (req: Request, res: Response) => {
     const { filename } = req.params;
     const filePath = path.join(__dirname, 'uploads', filename);
     res.sendFile(filePath);
