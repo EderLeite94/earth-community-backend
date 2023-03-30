@@ -5,6 +5,7 @@ import Image from '../../models/feed/index'
 import Users from '../../models/users/index';
 import multer from 'multer';
 import { upload } from '../../config/multer';
+import path from 'path';
 const router = express.Router();
 
 // Create post
@@ -156,4 +157,9 @@ router.post('/img', upload.single("file"), async (req: Request, res: Response) =
         res.status(500).json({ message: "Erro ao salvar a imagem." });
     }
 });
+router.get('/uploads/:filename', (req: Request, res: Response) => {
+    const { filename } = req.params;
+    const filePath = path.join(__dirname, 'uploads', filename);
+    res.sendFile(filePath);
+  });
 export default router
