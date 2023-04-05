@@ -1,17 +1,15 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema, Types } from 'mongoose';
+type ObjectId = Types.ObjectId;
 
 export interface IFeed {
     text: string;
-    image: {
-        name?: { type: string },
-        src?: { type: string }
-    };
+    image: string;
     likes: {
         quantity: number,
         userIds: string[];
     }
     comments: Array<{
-        _id?: any;
+        id_comments?: mongoose.Types.ObjectId | undefined | string;
         userId: string;
         comment: string;
     }>
@@ -24,15 +22,13 @@ export type FeedDocument = IFeed & Document;
 
 const FeedSchema: Schema = new Schema({
     text: { type: String, required: true },
-    image: {
-        name: { type: String },
-        src: { type: String }
-    },
+    image: { type: String },
     likes: {
         quantity: { type: Number, default: 0 },
         userIds: { type: [String], default: [] },
     },
     comments: Array<{
+        id_comments: { type: mongoose.Schema.Types.ObjectId },
         userId: { type: String },
         comment: { type: String },
     }>,
@@ -45,10 +41,5 @@ export interface IFeedithId extends IFeed {
 }
 
 const Post = mongoose.model<FeedDocument>('Post', FeedSchema);
-const ImageSchema = new Schema({
-    name: { type: String, required: true },
-    src: { type: String, required: true },
-  });
-  
-  module.exports = mongoose.model("Image", ImageSchema);
+
 export default Post;

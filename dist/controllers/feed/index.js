@@ -5,30 +5,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const index_1 = __importDefault(require("../../models/feed/index"));
-const index_2 = __importDefault(require("../../models/feed/index"));
-const index_3 = __importDefault(require("../../models/users/index"));
-const multer_1 = require("../../config/multer");
-const path_1 = __importDefault(require("path"));
+const index_2 = __importDefault(require("../../models/users/index"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const router = express_1.default.Router();
 // Create post
-router.post('/post/create/:id', multer_1.upload.single("image"), async (req, res) => {
+router.post('/post/create/:id', async (req, res) => {
     const id = req.params.id;
     const { text } = req.body;
     // Date Brazil
     const data = new Date();
     const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
-    if (!text) {
-        return res.status(400).send('Insira um texto!');
-    }
-    const UserId = await index_3.default.findOne({ _id: id }, req.body);
-    if (!UserId) {
-        return res.status(400).send('Usuário invalido!');
-    }
     const post = {
         text,
         createdByUserId: id,
         createdAt: now
     };
+    if (!text) {
+        return res.status(400).send('Insira um texto!');
+    }
+    const UserId = await index_2.default.findOne({ _id: id }, req.body);
+    if (!UserId) {
+        return res.status(400).send('Usuário invalido!');
+    }
     try {
         await index_1.default.create(post);
         res.status(201).json({
@@ -39,6 +37,22 @@ router.post('/post/create/:id', multer_1.upload.single("image"), async (req, res
     catch (error) {
         console.error('Error creating post:', error);
         res.status(500).json({ error: error });
+    }
+});
+//Delete post 
+router.delete('/post/delete/:id', async (req, res) => {
+    const id = req.params.id;
+    try {
+        const post = await index_1.default.findById(id);
+        if (!post) {
+            return res.status(404).send('Post não encontrado');
+        }
+        await post.deleteOne();
+        res.status(200).send('Post removido com sucesso');
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).send('Erro ao remover post');
     }
 });
 // Get all post
@@ -105,7 +119,9 @@ router.post('/post/comment/:id/:userId', async (req, res) => {
         if (!post) {
             return res.status(404).send('Post não encontrado');
         }
-        post.comments.push({ userId, comment });
+        post.comments.push({
+            userId, comment, id_comments: new mongoose_1.default.Types.ObjectId()
+        });
         await post.save();
         res.status(200).send('Comentário adicionado com sucesso');
     }
@@ -115,17 +131,18 @@ router.post('/post/comment/:id/:userId', async (req, res) => {
     }
 });
 //delete comment
-router.delete('/post/delete-comment/:id/:_id', async (req, res) => {
-    const { id, _id } = req.params;
+router.delete('/post/delete-comment/:id/:id_comments', async (req, res) => {
+    const { id, id_comments } = req.params;
     try {
         const post = await index_1.default.findById(id);
         if (!post) {
             return res.status(404).send('Post não encontrado');
         }
-        const comments = index_1.default.findById(_id);
-        if (!comments) {
+        const commentIndex = post.comments.findIndex((comment) => String(comment.id_comments) === id_comments);
+        if (commentIndex === -1) {
             return res.status(404).send('Comentário não encontrado');
         }
+        post.comments.splice(commentIndex, 1);
         await post.save();
         res.status(200).send('Comentário removido com sucesso');
     }
@@ -133,29 +150,6 @@ router.delete('/post/delete-comment/:id/:_id', async (req, res) => {
         console.error(err);
         res.status(500).send('Erro ao remover comentário');
     }
-});
-router.post('/img', multer_1.upload.single("file"), async (req, res) => {
-    try {
-        const { name } = req.body;
-        const file = req.file;
-        if (!file) {
-            return res.status(400).json({ message: "Arquivo não enviado." });
-        }
-        const image = new index_2.default({
-            name,
-            src: file.path,
-        });
-        await image.save();
-        res.json(image);
-    }
-    catch (err) {
-        res.status(500).json({ message: "Erro ao salvar a imagem." });
-    }
-});
-router.get('/uploads/feed/:filename', (req, res) => {
-    const { filename } = req.params;
-    const filePath = path_1.default.join(process.cwd(), 'uploads', 'feed', filename);
-    res.sendFile(filePath);
 });
 exports.default = router;
 //# sourceMappingURL=index.js.map

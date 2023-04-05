@@ -26,10 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const FeedSchema = new mongoose_1.Schema({
     text: { type: String, required: true },
-    image: {
-        name: { type: String },
-        src: { type: String }
-    },
+    image: { type: String },
     likes: {
         quantity: { type: Number, default: 0 },
         userIds: { type: [String], default: [] },
@@ -40,10 +37,5 @@ const FeedSchema = new mongoose_1.Schema({
     createdAt: { type: Date }
 });
 const Post = mongoose_1.default.model('Post', FeedSchema);
-const ImageSchema = new mongoose_1.Schema({
-    name: { type: String, required: true },
-    src: { type: String, required: true },
-});
-module.exports = mongoose_1.default.model("Image", ImageSchema);
 exports.default = Post;
 //# sourceMappingURL=index.js.map
