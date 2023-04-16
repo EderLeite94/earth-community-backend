@@ -11,12 +11,13 @@ const router = express_1.default.Router();
 // Create post
 router.post('/post/create/:id', async (req, res) => {
     const id = req.params.id;
-    const { text } = req.body;
+    const { text, image } = req.body;
     // Date Brazil
     const data = new Date();
     const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
     const post = {
         text,
+        image,
         createdByUserId: id,
         createdAt: now
     };

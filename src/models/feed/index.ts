@@ -7,12 +7,12 @@ export interface IFeed {
     likes: {
         quantity: number,
         userIds: string[];
-    }
+    };
     comments: Array<{
         id_comments?: mongoose.Types.ObjectId | undefined | string;
         userId: string;
         comment: string;
-    }>
+    }>;
     createdByUserId: string;
     createdByGroupId: string;
     createdAt: Date;

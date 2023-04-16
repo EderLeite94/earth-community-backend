@@ -17,7 +17,7 @@ export interface IUsers {
         city: string;
         state: string
     },
-    groupIds: number[]
+    groupIds: string[]
 }
 
 export type UsersDocument = IUsers & Document;
@@ -38,7 +38,7 @@ const UsersSchema: Schema = new Schema({
         city: { type: String },
         state: { type: String }
     },
-    groupIds: [{ type: Number }]
+    groupIds: [{ type: String }]
 });
 export interface IUsersithId extends IUsers {
     _id: string;
