@@ -51,7 +51,7 @@
                         "description": "Not Found"
                     },
                     "201": {
-                        "description": "Created",
+                        "description": "Login",
                         "content": {
                             "application/json": {
                                 "schemma": {
@@ -65,7 +65,7 @@
             }
         },
         "/api/auth/user/sign-in": {
-            "get": {
+            "post": {
                 "summary": "Login to Earth-Comunity",
                 "description": "Route responsible for user login",
                 "tags": [
@@ -112,5 +112,6 @@
             }
         }
     },
+    
     "components": {}
 }
