@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import express, { Application, Express } from 'express';
+import  express, { Application, Express } from 'express';
 const app: Application = express();
 
 const port = parseInt(process.env.PORT || '3000', 10);

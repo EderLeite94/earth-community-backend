@@ -2,9 +2,9 @@
   "name": "earth-community-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "tsc && node dist/index.js",
+    "start": "tsc && node dist/src/index.js",
     "build": "tsc"
   },
   "keywords": [],
@@ -37,10 +37,10 @@
     "nodemon": "^2.0.21",
     "npm": "^9.6.1",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^4.6.2",
-    "typescript": "^4.9.5"
+    "swagger-ui-express": "^4.6.2"
   },
   "devDependencies": {
-    "@types/redis": "^4.0.11"
+    "@types/redis": "^4.0.11",
+    "typescript": "^5.0.4"
   }
 }

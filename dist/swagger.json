@@ -1,0 +1,116 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "Earth-Community API Documentation",
+        "description": "In this documentation you will be able to consult the API end-points and also test all available routes. Do not forget to register and carry out the authorization.",
+        "contact": {
+            "email": "ederaparecidoleite@hotmail.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "https://earth-community-backend-production.up.railway.app",
+            "description": "Remote access"
+        }
+    ],
+    "paths": {
+        "/api/auth/user/sign-up": {
+            "post": {
+                "summary": "Create a new user",
+                "description": "Route responsible for creating a new user",
+                "tags": [
+                    "Users"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": ""
+                            },
+                            "examples": {
+                                "Users": {
+                                    "value": {
+                                        "info": {
+                                            "firstName": "Manoel",
+                                            "surName": "Nobrega",
+                                            "email": "manoel74@gmail.com"
+                                        },
+                                        "security": {
+                                            "password": "123456789",
+                                            "confirmPassword": "123456789"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "500": {
+                        "description": "Not Found"
+                    },
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schemma": {
+                                    "type": "object",
+                                    "$ref": ""
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/auth/user/sign-in": {
+            "get": {
+                "summary": "Login to Earth-Comunity",
+                "description": "Route responsible for user login",
+                "tags": [
+                    "Users"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": ""
+                            },
+                            "examples": {
+                                "Users": {
+                                    "value": {
+                                        "info": {
+                                            "email": "Manoel@gmail.com"
+                                        },
+                                        "security": {
+                                            "password": "123456789",
+                                            "confirmPassword": "123456789"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "500": {
+                        "description": "Not Found"
+                    },
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schemma": {
+                                    "type": "object",
+                                    "$ref": ""
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {}
+}
