@@ -110,8 +110,216 @@
                     }
                 }
             }
+        },
+        "/api/user/update-by-id/{id}": {
+            "patch": {
+                "summary": "Update a user",
+                "description": "Route responsible for updating a user",
+                "tags": [
+                    "Users"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "description": "User ID",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": ""
+                            },
+                            "examples": {
+                                "Usuario": {
+                                    "value": {
+                                        "info": {
+                                            "firstName": "Jose",
+                                            "surName": "Antonio",
+                                            "email": "manoel74@gmail.com",
+                                            "dateOfBirth": "26/10/1994",
+                                            "phone": "00000000000"
+                                        },
+                                        "address": {
+                                            "city": "Araraquara",
+                                            "state": "SP"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "422": {
+                        "description": "Usuário não encontrado"
+                    },
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": ""
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/post/create/{id}": {
+            "post": {
+                "summary": "Create a new post",
+                "description": "Route responsible for creating a new post based on the user ID",
+                "tags": [
+                    "Post"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "description": "User ID",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": ""
+                            },
+                            "examples": {
+                                "Users": {
+                                    "value": {
+                                        "text": "Samos Boms!",
+                                        "image": "link da imagem"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "500": {
+                        "description": "Not Found"
+                    },
+                    "201": {
+                        "description": "Created Post",
+                        "content": {
+                            "application/json": {
+                                "schemma": {
+                                    "type": "object",
+                                    "$ref": ""
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/post/delete/{id}": {
+            "delete": {
+                "summary": "Delete the post",
+                "description": "Route responsible for deleting a post based on post ID",
+                "tags": [
+                    "Post"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "description": "Post ID",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "500": {
+                        "description": "Not Found"
+                    },
+                    "201": {
+                        "description": "Delete post by ID",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": ""
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },        
+        "/api/post/get-by-id/{id}": {
+            "get": {
+                "summary": "Search a post by ID",
+                "description": "Route responsible for returning post based on post ID",
+                "tags": [
+                    "Post"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "description": "Post ID",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "500": {
+                        "description": "Not Found"
+                    },
+                    "201": {
+                        "description": "Post by ID",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": ""
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/post/get-all": {
+            "get": {
+                "summary": "Returns all posts",
+                "description": "Route responsible for returning all posts",
+                "tags": [
+                    "Post"
+                ],
+                "responses": {
+                    "500": {
+                        "description": "Not Found"
+                    },
+                    "201": {
+                        "description": "Post",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": ""
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
-    
     "components": {}
 }
