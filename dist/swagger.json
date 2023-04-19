@@ -319,7 +319,288 @@
                     }
                 }
             }
-        }
-    },
-    "components": {}
+        },
+        "/api/post/like/{id}/{userId}": {
+            "post": {
+                "summary": "Like and unlike",
+                "description": "Route responsible for the like and dislike of a post passing the ID of the post and the ID of the user who will like it",
+                "tags": [
+                    "Post"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "description": "Post ID",
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "userId",
+                        "type": "string",
+                        "description": "User ID",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "500": {
+                        "description": "Not Found"
+                    },
+                    "201": {
+                        "description": "Post by ID",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": ""
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/post/comment/{id}/{userId}": {
+            "post": {
+                "summary": "Add a comment to a post",
+                "description": "Route responsible for adding a comment on the post",
+                "tags": [
+                    "Post"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "description": "Post ID",
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "userId",
+                        "type": "string",
+                        "description": "User ID",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "description": "Comment object",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "comment": {
+                                        "type": "string",
+                                        "example": "Muito DEV!!!"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "500": {
+                        "description": "Not Found"
+                    },
+                    "201": {
+                        "description": "Post by ID",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": ""
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/post/delete-comment/{id}/{id_comment}": {
+            "delete": {
+                "summary": "Delete a comment from a post",
+                "description": "Route responsible for deleting a comment from the post",
+                "tags": [
+                    "Post"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "description": "Post ID",
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id_comment",
+                        "type": "string",
+                        "description": "Comment ID",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "500": {
+                        "description": "Not Found"
+                    },
+                    "200": {
+                        "description": "Comment deleted"
+                    }
+                }
+            }
+        },
+        "/api/group/create/{id}": {
+            "post": {
+                "summary": "Create a new group",
+                "description": "Route responsible for creating a new group based on the user ID",
+                "tags": [
+                    "Group"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "description": "User ID",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": ""
+                            },
+                            "examples": {
+                                "Group": {
+                                    "value": {
+                                        "name": "Todos Salve a Amazonia",
+                                        "image": "www.facebook.com",
+                                        "description": "Grupo voltado a preservação da Amazonia",
+                                        "category": "Meio Ambiente",
+                                        "headOffice": {
+                                            "city": "Jaú",
+                                            "state": "SP"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "500": {
+                        "description": "Not Found"
+                    },
+                    "201": {
+                        "description": "Created Group",
+                        "content": {
+                            "application/json": {
+                                "schemma": {
+                                    "type": "object",
+                                    "$ref": ""
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/group/get-all": {
+            "get": {
+                "summary": "Returns all group",
+                "description": "Route responsible for returning all group",
+                "tags": [
+                    "Group"
+                ],
+                "responses": {
+                    "500": {
+                        "description": "Not Found"
+                    },
+                    "201": {
+                        "description": "Group",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": ""
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/group/delete/{id}/{userId}": {
+            "delete": {
+                "summary": "Delete a group",
+                "description": "Route responsible for deleting a group by checking if the user ID is the group creator",
+                "tags": [
+                    "Group"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "description": "Group ID",
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "userId",
+                        "type": "string",
+                        "description": "User ID",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "500": {
+                        "description": "Not Found"
+                    },
+                    "200": {
+                        "description": "Group deleted"
+                    }
+                }
+            }
+        },
+        "/api/group/get-by-id/{id}": {
+            "get": {
+                "summary": "Search a group by ID",
+                "description": "Route responsible for returning group based on post ID",
+                "tags": [
+                    "Group"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "description": "Group ID",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "500": {
+                        "description": "Not Found"
+                    },
+                    "201": {
+                        "description": "Group by ID",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": ""
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "components": {}
+    }
 }
