@@ -93,5 +93,46 @@ router.get('/group/get-by-id/:id', async (req, res) => {
         res.status(500).json({ error: error });
     }
 });
+router.post('/group/add-member/:id/:userId', async (req, res) => {
+    const { id, userId } = req.params;
+    try {
+        const group = await index_1.default.findById(id);
+        const UserExist = await index_1.default.findOne({ memberIds: userId });
+        if (!group) {
+            return res.status(404).json({ message: 'Grupo não encontrado' });
+        }
+        // Verifica se o userId já está presente no array memberIds
+        if (UserExist) {
+            return res.status(400).json({ message: 'Usuário já é membro deste grupo' });
+        }
+        await index_1.default.findByIdAndUpdate(id, { $addToSet: { memberIds: userId } });
+        await index_2.default.findByIdAndUpdate(userId, { $addToSet: { groupIds: id } });
+        res.status(200).json({ message: 'Membro adicionado com sucesso' });
+    }
+    catch (error) {
+        console.error('Error adding member:', error);
+        res.status(500).json({ error: error });
+    }
+});
+router.post('/group/remove-member/:id/:userId', async (req, res) => {
+    const { id, userId } = req.params;
+    try {
+        const group = await index_1.default.findById(id);
+        const UserExist = await index_1.default.findOne({ memberIds: userId });
+        if (!group) {
+            return res.status(404).json({ message: 'Grupo não encontrado' });
+        }
+        if (!UserExist) {
+            return res.status(400).json({ message: 'Usuário não é membro deste grupo' });
+        }
+        await index_1.default.findByIdAndUpdate(id, { $pull: { memberIds: userId } });
+        await index_2.default.findByIdAndUpdate(userId, { $pull: { groupIds: id } });
+        res.status(200).json({ message: 'Membro removido com sucesso' });
+    }
+    catch (error) {
+        console.error('Error remove member:', error);
+        res.status(500).json({ error: error });
+    }
+});
 exports.default = router;
 //# sourceMappingURL=index.js.map

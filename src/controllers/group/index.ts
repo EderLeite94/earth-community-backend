@@ -95,4 +95,50 @@ router.get('/group/get-by-id/:id', async (req: Request, res: Response) => {
     res.status(500).json({ error: error });
   }
 });
+router.post('/group/add-member/:id/:userId', async (req: Request, res: Response) => {
+  const { id, userId } = req.params;
+
+  try {
+    const group = await Group.findById(id);
+    const UserExist = await Group.findOne({ memberIds: userId })
+    if (!group) {
+      return res.status(404).json({ message: 'Grupo não encontrado' });
+    }
+
+    // Verifica se o userId já está presente no array memberIds
+    if (UserExist) {
+      return res.status(400).json({ message: 'Usuário já é membro deste grupo' });
+    }
+
+    await Group.findByIdAndUpdate(id, { $addToSet: { memberIds: userId } });
+    await Users.findByIdAndUpdate(userId, { $addToSet: { groupIds: id } });
+
+    res.status(200).json({ message: 'Usuário adicionado com sucesso' });
+  } catch (error) {
+    console.error('Error adding member:', error);
+    res.status(500).json({ error: error });
+  }
+});
+router.post('/group/remove-member/:id/:userId', async (req: Request, res: Response) => {
+  const { id, userId } = req.params;
+
+  try {
+    const group = await Group.findById(id);
+    const UserExist = await Group.findOne({ memberIds: userId })
+    if (!group) {
+      return res.status(404).json({ message: 'Grupo não encontrado' });
+    }
+    if (!UserExist) {
+      return res.status(400).json({ message: 'Usuário não é membro deste grupo' });
+    }
+
+    await Group.findByIdAndUpdate(id, { $pull: { memberIds: userId } });
+    await Users.findByIdAndUpdate(userId, { $pull: { groupIds: id } });
+
+    res.status(200).json({ message: 'Usuário removido com sucesso' });
+  } catch (error) {
+    console.error('Error remove member:', error);
+    res.status(500).json({ error: error });
+  }
+});
 export default router;
