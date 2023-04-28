@@ -107,7 +107,7 @@ router.post('/group/add-member/:id/:userId', async (req, res) => {
         }
         await index_1.default.findByIdAndUpdate(id, { $addToSet: { memberIds: userId } });
         await index_2.default.findByIdAndUpdate(userId, { $addToSet: { groupIds: id } });
-        res.status(200).json({ message: 'Membro adicionado com sucesso' });
+        res.status(200).json({ message: 'Usuário adicionado com sucesso' });
     }
     catch (error) {
         console.error('Error adding member:', error);
@@ -127,7 +127,7 @@ router.post('/group/remove-member/:id/:userId', async (req, res) => {
         }
         await index_1.default.findByIdAndUpdate(id, { $pull: { memberIds: userId } });
         await index_2.default.findByIdAndUpdate(userId, { $pull: { groupIds: id } });
-        res.status(200).json({ message: 'Membro removido com sucesso' });
+        res.status(200).json({ message: 'Usuário removido com sucesso' });
     }
     catch (error) {
         console.error('Error remove member:', error);
