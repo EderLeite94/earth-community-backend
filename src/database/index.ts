@@ -1,18 +1,22 @@
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-dotenv.config();
+import  express, { Application, Express } from 'express';
+const app: Application = express();
 
-const port: number = parseInt(process.env.PORT || '3000');
-const URL = process.env.MONGODB_URI
-const connectDatabase = (): Promise<void> => {
-    console.info(`Aplicação rodando na porta ${port}`);
-    console.log('Conectando ao banco de dados, aguarde!');
-    mongoose.set('strictQuery', true);
-    return mongoose.connect(`${URL}`)
-        .then(() => {
-            console.log('Conectado ao Earth - Community');
-        })
-        .catch((err) => console.log(err));
+const port = parseInt(process.env.PORT || '3000', 10);
+console.log('Conectando ao Earth-Community...');
+const connectDatabase = (app: Application) => {
+  mongoose.set('strictQuery', true);
+  mongoose.connect(process.env.MONGODB_URI as string)
+    .then(() => {
+      console.log('Conectado ao Earth-Community!');
+      app.listen(port, () => {
+        console.log(`Servidor iniciado na porta ${port}`);
+      });
+    })
+    .catch((err) => {
+      console.error('Erro ao conectar com o banco de dados:', err);
+      process.exit(1);
+    });
 };
 
 export default connectDatabase;
