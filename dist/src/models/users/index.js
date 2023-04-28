@@ -40,7 +40,8 @@ const UsersSchema = new mongoose_1.Schema({
         city: { type: String },
         state: { type: String }
     },
-    groupIds: [{ type: String }]
+    groupIds: [{ type: String }],
+    donationIds: [{ type: Number }]
 });
 const Users = mongoose_1.default.model('Users', UsersSchema);
 exports.default = Users;
