@@ -33,6 +33,21 @@ router.post('/donation/:userId', async (req, res) => {
         const payment = await mercadopago_1.default.payment.create(payment_data);
         // Salvando o ID da doação no array donationIds do documento do usuário
         await index_1.default.findByIdAndUpdate(userId, { $push: { donationIds: payment.body.id } });
+        // await Users.findByIdAndUpdate(userId, {$push:{donationIds: payment.body.ticket_url}})
+        res.status(200).send(payment);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).send(error);
+    }
+});
+router.get('/payment/:paymentId/status', async (req, res) => {
+    const paymentId = parseInt(req.params.paymentId);
+    try {
+        mercadopago_1.default.configure({
+            access_token: process.env.access_token_prd
+        });
+        const payment = await mercadopago_1.default.payment.get(paymentId);
         res.status(200).send(payment);
     }
     catch (error) {

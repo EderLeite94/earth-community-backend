@@ -42,6 +42,18 @@ router.post('/donation/:userId', async (req: Request, res: Response) => {
         res.status(500).send(error);
     }
 });
-
+router.get('/payment/:paymentId/status', async (req: Request, res: Response) => {
+    const paymentId = parseInt(req.params.paymentId);
+    try {
+        mercadopago.configure({
+            access_token: process.env.access_token_prd as string
+        });
+        const payment = await mercadopago.payment.get(paymentId);
+        res.status(200).send(payment);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send(error);
+    }
+});
 
 export default router;
