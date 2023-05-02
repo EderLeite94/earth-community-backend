@@ -9,7 +9,7 @@ const router = express.Router();
 // Register users
 router.post('/auth/user/sign-up', async (req: Request, res: Response) => {
     const { info, security } = req.body;
-    const { firstName, surName, email } = info;
+    const { firstName, surname, email } = info;
     const { password, confirmPassword } = security;
 
     // create password
@@ -23,7 +23,7 @@ router.post('/auth/user/sign-up', async (req: Request, res: Response) => {
     if (!firstName) {
         return res.status(400).send('O nome é obrigatorio!');
     }
-    if (!surName) {
+    if (!surname) {
         return res.status(400).send('O sobrenome é obrigatorio!');
     }
     if (!email) {
@@ -44,7 +44,7 @@ router.post('/auth/user/sign-up', async (req: Request, res: Response) => {
     const user = {
         info: {
             firstName,
-            surName,
+            surname,
             email
         },
         security: {
@@ -104,7 +104,7 @@ router.patch('/user/update-by-id/:id', async (req: Request, res: Response) => {
     moment.locale('pt-BR');
     const id: string = req.params.id;
     const { info, address } = req.body;
-    const { firstName, surName, email, dateOfBirth, phone } = info;
+    const { firstName, surname, email, dateOfBirth, phone } = info;
     const isoDate = moment(dateOfBirth, 'DD/MM/YYYY', true).toDate();
     info.dateOfBirth = isoDate;
     const { city, state } = address

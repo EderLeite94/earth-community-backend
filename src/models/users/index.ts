@@ -4,7 +4,7 @@ export interface IUsers {
     info: {
         _id: any;
         firstName: string;
-        surName: string;
+        surname: string;
         email: string;
         dateOfBirth: Date;
         phone: string
@@ -26,7 +26,7 @@ export type UsersDocument = IUsers & Document;
 const UsersSchema: Schema = new Schema({
     info: {
         firstName: { type: String, required: true },
-        surName: { type: String, required: true },
+        surname: { type: String, required: true },
         email: { type: String, required: true, unique: true },
         dateOfBirth: { type: Date },
         phone: { type: String }
