@@ -12,7 +12,7 @@ const router = express_1.default.Router();
 // Register users
 router.post('/auth/user/sign-up', async (req, res) => {
     const { info, security } = req.body;
-    const { firstName, surName, email } = info;
+    const { firstName, surname, email } = info;
     const { password, confirmPassword } = security;
     // create password
     const salt = await bcrypt_1.default.genSalt(12);
@@ -23,7 +23,7 @@ router.post('/auth/user/sign-up', async (req, res) => {
     if (!firstName) {
         return res.status(400).send('O nome é obrigatorio!');
     }
-    if (!surName) {
+    if (!surname) {
         return res.status(400).send('O sobrenome é obrigatorio!');
     }
     if (!email) {
@@ -43,7 +43,7 @@ router.post('/auth/user/sign-up', async (req, res) => {
     const user = {
         info: {
             firstName,
-            surName,
+            surname,
             email
         },
         security: {
@@ -102,7 +102,7 @@ router.patch('/user/update-by-id/:id', async (req, res) => {
     moment_1.default.locale('pt-BR');
     const id = req.params.id;
     const { info, address } = req.body;
-    const { firstName, surName, email, dateOfBirth, phone } = info;
+    const { firstName, surname, email, dateOfBirth, phone } = info;
     const isoDate = (0, moment_1.default)(dateOfBirth, 'DD/MM/YYYY', true).toDate();
     info.dateOfBirth = isoDate;
     const { city, state } = address;

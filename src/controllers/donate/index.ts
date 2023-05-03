@@ -6,6 +6,9 @@ const router = express.Router();
 
 router.post('/donation/:userId', async (req: Request, res: Response) => {
     const userId = req.params.userId;
+    const { transaction_amount, description, payer, address } = req.body;
+    const { email, first_name, last_name } = payer;
+    const { zip_code, street_name, street_number, neighborhood, city, federal_unit, type, number } = address;
     try {
         const user = await Users.findById(userId);
         if (!user) {
@@ -16,8 +19,6 @@ router.post('/donation/:userId', async (req: Request, res: Response) => {
             access_token: process.env.access_token_prd as string
         });
 
-        const { transaction_amount, description, email, first_name, last_name } = req.body;
-
         const payment_data = {
             transaction_amount,
             description,
@@ -25,7 +26,19 @@ router.post('/donation/:userId', async (req: Request, res: Response) => {
             payer: {
                 email,
                 first_name,
-                last_name
+                last_name,
+                identification: {
+                    type,
+                    number
+                },
+                address: {
+                    zip_code,
+                    street_name,
+                    street_number,
+                    neighborhood,
+                    city,
+                    federal_unit,
+                }
             },
             notification_url: "https://www.seu-site.com/notificacoes/mercado-pago",
             installments: 1,
@@ -33,16 +46,13 @@ router.post('/donation/:userId', async (req: Request, res: Response) => {
 
         const payment = await mercadopago.payment.create(payment_data);
 
-        // Salvando o ID da doação no array donationIds do documento do usuário
         await Users.findByIdAndUpdate(userId, { $push: { donationIds: payment.body.id } });
-        // await Users.findByIdAndUpdate(userId, {$push:{donationIds: payment.body.ticket_url}})
         res.status(200).send(payment);
     } catch (error) {
-        console.error(error);
         res.status(500).send(error);
     }
 });
-router.get('/payment/:paymentId/status', async (req: Request, res: Response) => {
+router.get('/payment/status/:paymentId', async (req: Request, res: Response) => {
     const paymentId = parseInt(req.params.paymentId);
     try {
         mercadopago.configure({
