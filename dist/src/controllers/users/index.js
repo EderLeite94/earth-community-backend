@@ -15,7 +15,7 @@ router.post('/auth/user/sign-up', async (req, res, next) => {
     try {
         const { info, security } = req.body;
         const { firstName, surname, email } = info;
-        const { password, confirmPassword } = security;
+        const { authWith, password, confirmPassword } = security;
         // Validate input data
         await index_2.default.validateAsync(Object.assign(Object.assign({}, info), security), { abortEarly: false });
         // Create password hash
@@ -36,6 +36,7 @@ router.post('/auth/user/sign-up', async (req, res, next) => {
                 email
             },
             security: {
+                authWith,
                 password: passwordHash,
                 accountCreateDate: now
             }

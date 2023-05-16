@@ -7,18 +7,19 @@ export interface IUsers {
         surname: string;
         email: string;
         dateOfBirth: Date;
-        phone: string
-    }
+        phone: string;
+    };
     security: {
+        authWith: 'google' | 'facebook' | 'manually';
         password: string;
         accountCreateDate: Date;
-    }
+    };
     address: {
         city: string;
-        state: string
-    },
-    groupIds: string[]
-    donationIds: number[]
+        state: string;
+    };
+    groupIds: string[];
+    donationIds: number[];
 }
 
 export type UsersDocument = IUsers & Document;
@@ -29,20 +30,22 @@ const UsersSchema: Schema = new Schema({
         surname: { type: String, required: true },
         email: { type: String, required: true, unique: true },
         dateOfBirth: { type: Date },
-        phone: { type: String }
+        phone: { type: String },
     },
     security: {
+        authWith: { type: String, enum: ['google', 'facebook', 'manually'] },
         password: { type: String },
         accountCreateDate: { type: Date },
     },
     address: {
         city: { type: String },
-        state: { type: String }
+        state: { type: String },
     },
     groupIds: [{ type: String }],
-    donationIds: [{ type: Number }]
+    donationIds: [{ type: Number }],
 });
-export interface IUsersithId extends IUsers {
+
+export interface IUsersWithId extends IUsers {
     _id: string;
 }
 

@@ -9,6 +9,7 @@ const signUpSchema = joi_1.default.object({
     surname: joi_1.default.string().required().error(new Error('O sobrenome é obrigatório')),
     email: joi_1.default.string().email().required().error(new Error('O email é obrigatório')),
     password: joi_1.default.string().required().error(new Error('A senha é obrigatória')),
+    authWith: joi_1.default.string().valid('google', 'facebook', 'manually').required(),
     confirmPassword: joi_1.default.string().valid(joi_1.default.ref('password')).required().error(new Error('As senhas não conferem'))
 });
 exports.default = signUpSchema;

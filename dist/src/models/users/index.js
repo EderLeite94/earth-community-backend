@@ -30,18 +30,19 @@ const UsersSchema = new mongoose_1.Schema({
         surname: { type: String, required: true },
         email: { type: String, required: true, unique: true },
         dateOfBirth: { type: Date },
-        phone: { type: String }
+        phone: { type: String },
     },
     security: {
+        authWith: { type: String, enum: ['google', 'facebook', 'manually'] },
         password: { type: String },
         accountCreateDate: { type: Date },
     },
     address: {
         city: { type: String },
-        state: { type: String }
+        state: { type: String },
     },
     groupIds: [{ type: String }],
-    donationIds: [{ type: Number }]
+    donationIds: [{ type: Number }],
 });
 const Users = mongoose_1.default.model('Users', UsersSchema);
 exports.default = Users;

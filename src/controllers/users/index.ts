@@ -12,7 +12,7 @@ router.post('/auth/user/sign-up', async (req: Request, res: Response, next: Next
     try {
         const { info, security } = req.body;
         const { firstName, surname, email } = info;
-        const { password, confirmPassword } = security;
+        const { authWith, password, confirmPassword } = security;
         // Validate input data
         await signUpSchema.validateAsync({ ...info, ...security }, { abortEarly: false });
         // Create password hash
@@ -33,6 +33,7 @@ router.post('/auth/user/sign-up', async (req: Request, res: Response, next: Next
                 email
             },
             security: {
+                authWith,
                 password: passwordHash,
                 accountCreateDate: now
             }
@@ -45,13 +46,13 @@ router.post('/auth/user/sign-up', async (req: Request, res: Response, next: Next
         });
     } catch (error) {
         if (error instanceof Joi.ValidationError) {
-          const errors = error.details.map((err) => err.message);
-          return res.status(422).json({ error: errors });
+            const errors = error.details.map((err) => err.message);
+            return res.status(422).json({ error: errors });
         } else {
-          console.error('Error creating user:', error);
-          return res.status(500).json({ error: (error as Error).message });
+            console.error('Error creating user:', error);
+            return res.status(500).json({ error: (error as Error).message });
         }
-      }
+    }
 });
 
 //Login users
