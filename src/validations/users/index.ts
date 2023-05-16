@@ -7,5 +7,4 @@ const signUpSchema = Joi.object({
     password: Joi.string().required().error(new Error('A senha é obrigatória')),
     confirmPassword: Joi.string().valid(Joi.ref('password')).required().error(new Error('As senhas não conferem'))
 });
-
 export default signUpSchema;

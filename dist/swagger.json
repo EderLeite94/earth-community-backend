@@ -33,7 +33,7 @@
                                     "value": {
                                         "info": {
                                             "firstName": "Manoel",
-                                            "surName": "Nobrega",
+                                            "surname": "Nobrega",
                                             "email": "manoel74@gmail.com"
                                         },
                                         "security": {
@@ -143,7 +143,7 @@
                                     "value": {
                                         "info": {
                                             "firstName": "Jose",
-                                            "surName": "Antonio",
+                                            "surname": "Antonio",
                                             "email": "manoel74@gmail.com",
                                             "dateOfBirth": "26/10/1994",
                                             "phone": "00000000000"

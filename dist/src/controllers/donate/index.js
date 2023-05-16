@@ -7,15 +7,17 @@ const express_1 = __importDefault(require("express"));
 const index_1 = __importDefault(require("../../models/users/index"));
 const mercadopago_1 = __importDefault(require("mercadopago"));
 const router = express_1.default.Router();
-router.post('/donation/:userId', async (req, res) => {
-    const userId = req.params.userId;
-    const { transaction_amount, description, payer, address } = req.body;
-    const { email, first_name, last_name } = payer;
-    const { zip_code, street_name, street_number, neighborhood, city, federal_unit, type, number } = address;
+router.post('/donation/:userId?', async (req, res) => {
     try {
-        const user = await index_1.default.findById(userId);
-        if (!user) {
-            return res.status(404).send('Usuário não encontrado');
+        const userId = req.params.userId;
+        const { transaction_amount, description, payer, address } = req.body;
+        const { email, first_name, last_name } = payer;
+        const { zip_code, street_name, street_number, neighborhood, city, federal_unit, type, number } = address;
+        if (userId) {
+            const user = await index_1.default.findById(userId);
+            if (!user) {
+                return res.status(404).send('Usuário não encontrado');
+            }
         }
         mercadopago_1.default.configure({
             access_token: process.env.access_token_prd
@@ -45,7 +47,9 @@ router.post('/donation/:userId', async (req, res) => {
             installments: 1,
         };
         const payment = await mercadopago_1.default.payment.create(payment_data);
-        await index_1.default.findByIdAndUpdate(userId, { $push: { donationIds: payment.body.id } });
+        if (userId) {
+            await index_1.default.findByIdAndUpdate(userId, { $push: { donationIds: payment.body.id } });
+        }
         res.status(200).send(payment);
     }
     catch (error) {

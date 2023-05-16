@@ -59,9 +59,20 @@ router.delete('/post/delete/:id', async (req, res) => {
 // Get all post
 router.get('/post/get-all', async (req, res) => {
     try {
-        const post = await index_1.default.find();
-        res.status(201).json({
-            post
+        const { page, perPage } = req.query;
+        const pageNumber = parseInt(page) || 1;
+        const itemsPerPage = parseInt(perPage) || 10;
+        const totalData = await index_1.default.countDocuments();
+        const totalPages = Math.ceil(totalData / itemsPerPage);
+        const posts = await index_1.default.find()
+            .skip((pageNumber - 1) * itemsPerPage)
+            .limit(itemsPerPage);
+        res.status(200).json({
+            posts,
+            page: pageNumber,
+            perPage: itemsPerPage,
+            totalPages,
+            totalData,
         });
     }
     catch (error) {
