@@ -25,10 +25,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const DonateSchema = new mongoose_1.Schema({
+    trnansaction_id: { type: Number },
     transaction_amount: { type: String },
     description: { type: String },
     payment_method_id: { type: String },
     payer: {
+        user_id: { type: String },
         email: { type: String },
         first_name: { type: String },
         last_name: { type: String },

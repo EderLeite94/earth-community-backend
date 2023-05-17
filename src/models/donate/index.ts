@@ -2,10 +2,12 @@ import mongoose, { Document, Schema, Types } from 'mongoose';
 type ObjectId = Types.ObjectId;
 
 export interface IDonate {
+    trnansaction_id: number;
     transaction_amount: number;
     description: string;
     payment_method_id: string;
     payer: {
+        user_id: string | null,
         email: string,
         first_name: string,
         last_name: string,
@@ -27,10 +29,12 @@ export interface IDonate {
 export type DonateDocument = IDonate & Document;
 
 const DonateSchema: Schema = new Schema({
+    trnansaction_id: { type: Number },
     transaction_amount: { type: String },
     description: { type: String },
     payment_method_id: { type: String },
     payer: {
+        user_id: { type: String },
         email: { type: String },
         first_name: { type: String },
         last_name: { type: String },

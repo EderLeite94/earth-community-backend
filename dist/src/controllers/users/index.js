@@ -8,59 +8,56 @@ const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const index_1 = __importDefault(require("../../models/users/index"));
 const moment_1 = __importDefault(require("moment"));
+const joi_1 = __importDefault(require("joi"));
+const index_2 = __importDefault(require("../../validations/users/index"));
 const router = express_1.default.Router();
-// Register users
-router.post('/auth/user/sign-up', async (req, res) => {
-    const { info, security } = req.body;
-    const { firstName, surname, email } = info;
-    const { password, confirmPassword } = security;
-    // create password
-    const salt = await bcrypt_1.default.genSalt(12);
-    const passwordHash = await bcrypt_1.default.hash(password, salt);
-    // Date Brazil
-    const data = new Date();
-    const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
-    if (!firstName) {
-        return res.status(400).send('O nome é obrigatorio!');
-    }
-    if (!surname) {
-        return res.status(400).send('O sobrenome é obrigatorio!');
-    }
-    if (!email) {
-        return res.status(400).send('O email é obrigatorio!');
-    }
-    if (!password) {
-        return res.status(422).json({ error: 'A senha é obrigatória!' });
-    }
-    if (password !== confirmPassword) {
-        return res.status(422).json({ error: 'As senhas não conferem!' });
-    }
-    // check if email exists
-    const emailExists = await index_1.default.findOne({ 'info.email': email });
-    if (emailExists) {
-        return res.status(422).json({ error: 'E-mail já cadastrado!' });
-    }
-    const user = {
-        info: {
-            firstName,
-            surname,
-            email
-        },
-        security: {
-            password: passwordHash,
-            accountCreateDate: now
-        }
-    };
+//register
+router.post('/auth/user/sign-up', async (req, res, next) => {
     try {
+        const { info, security } = req.body;
+        const { firstName, surname, email } = info;
+        const { authWith, password, confirmPassword } = security;
+        // Validate input data
+        await index_2.default.validateAsync(Object.assign(Object.assign({}, info), security), { abortEarly: false });
+        // Create password hash
+        const salt = await bcrypt_1.default.genSalt(12);
+        const passwordHash = await bcrypt_1.default.hash(password, salt);
+        // Get current date/time in Brazil timezone
+        const data = new Date();
+        const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
+        //check if email exists
+        const emailExists = await index_1.default.findOne({ 'info.email': email });
+        if (emailExists) {
+            return res.status(422).json({ error: 'E-mail já cadastrado!' });
+        }
+        const user = {
+            info: {
+                firstName,
+                surname,
+                email
+            },
+            security: {
+                authWith,
+                password: passwordHash,
+                accountCreateDate: now
+            }
+        };
+        // Insert user in database
         await index_1.default.create(user);
         res.status(201).json({
-            message: 'Usuario cadastrado com sucesso!',
+            message: 'Usuário cadastrado com sucesso!',
             user,
         });
     }
     catch (error) {
-        console.error('Error creating user:', error);
-        res.status(500).json({ error: error });
+        if (error instanceof joi_1.default.ValidationError) {
+            const errors = error.details.map((err) => err.message);
+            return res.status(422).json({ error: errors });
+        }
+        else {
+            console.error('Error creating user:', error);
+            return res.status(500).json({ error: error.message });
+        }
     }
 });
 //Login users
