@@ -601,6 +601,72 @@
                 }
             }
         },
+        "/api/group/add-member/{id}/{userId}": {
+            "post": {
+                "summary": "Add a user to a group",
+                "description": "Route responsible for adding a user is required to pass group ID with user ID",
+                "tags": [
+                    "Group"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "description": "Group ID",
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "userId",
+                        "type": "string",
+                        "description": "User ID",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "500": {
+                        "description": "Not Found"
+                    },
+                    "200": {
+                        "description": "Usuário adicionado com sucesso"
+                    }
+                }
+            }
+        },
+        "/api/group/remove-member/{id}/{userId}": {
+            "delete": {
+                "summary": "Delete a user to a group",
+                "description": "Route responsible for delete a user is required to pass group ID with user ID",
+                "tags": [
+                    "Group"
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "type": "string",
+                        "description": "Group ID",
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "userId",
+                        "type": "string",
+                        "description": "User ID",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "500": {
+                        "description": "Not Found"
+                    },
+                    "200": {
+                        "description": "Usuário removido com sucesso"
+                    }
+                }
+            }
+        },
         "components": {}
     }
 }

@@ -114,16 +114,16 @@ router.post('/group/add-member/:id/:userId', async (req, res) => {
         res.status(500).json({ error: error });
     }
 });
-router.post('/group/remove-member/:id/:userId', async (req, res) => {
+router.delete('/group/remove-member/:id/:userId', async (req, res) => {
     const { id, userId } = req.params;
     try {
         const group = await index_1.default.findById(id);
         const UserExist = await index_1.default.findOne({ memberIds: userId });
         if (!group) {
-            return res.status(404).json({ message: 'Grupo não encontrado' });
+            return res.status(404).json({ error: 'Grupo não encontrado' });
         }
         if (!UserExist) {
-            return res.status(400).json({ message: 'Usuário não é membro deste grupo' });
+            return res.status(400).json({ error: 'Usuário não é membro deste grupo' });
         }
         await index_1.default.findByIdAndUpdate(id, { $pull: { memberIds: userId } });
         await index_2.default.findByIdAndUpdate(userId, { $pull: { groupIds: id } });
@@ -131,6 +131,31 @@ router.post('/group/remove-member/:id/:userId', async (req, res) => {
     }
     catch (error) {
         console.error('Error remove member:', error);
+        res.status(500).json({ error: error });
+    }
+});
+router.get('/search', async (req, res) => {
+    const name = req.query.name || '';
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const skip = (page - 1) * limit;
+    try {
+        const groupQuery = name ? { name: { $regex: new RegExp(name, 'i') } } : {}; // Pesquisa por nome do grupo
+        const userQuery = name ? { 'info.firstName': { $regex: new RegExp(name, 'i') } } : {}; // Pesquisa por nome do usuário
+        const [groupCount, userCount, groups, users] = await Promise.all([
+            index_1.default.countDocuments(groupQuery),
+            index_2.default.countDocuments(userQuery),
+            index_1.default.find(groupQuery).skip(skip).limit(limit).lean(),
+            index_2.default.find(userQuery).skip(skip).limit(limit).lean()
+        ]);
+        const groupPageCount = Math.ceil(groupCount / limit); // Número total de páginas para grupos
+        const userPageCount = Math.ceil(userCount / limit); // Número total de páginas para usuários
+        const result = [...users, ...groups]; // Junta os resultados em um único array, com usuários primeiro
+        const totalCount = groupCount + userCount; // Total de registros encontrados
+        res.status(200).json({ result, totalCount, groupCount, userCount, groupPageCount, userPageCount });
+    }
+    catch (error) {
+        console.error('Error:', error);
         res.status(500).json({ error: error });
     }
 });

@@ -7,7 +7,7 @@ import moment from 'moment';
 import Joi from 'joi';
 import signUpSchema from '../../validations/users/index';
 const router = express.Router();
-
+//register
 router.post('/auth/user/sign-up', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { info, security } = req.body;

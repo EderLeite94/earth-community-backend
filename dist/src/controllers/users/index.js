@@ -11,6 +11,7 @@ const moment_1 = __importDefault(require("moment"));
 const joi_1 = __importDefault(require("joi"));
 const index_2 = __importDefault(require("../../validations/users/index"));
 const router = express_1.default.Router();
+//register
 router.post('/auth/user/sign-up', async (req, res, next) => {
     try {
         const { info, security } = req.body;
