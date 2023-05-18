@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "undefined/subscriptions/3cb5fa26-4218-45bb-abee-f26290a1c925/resourceGroups/RG-AppServicePRD/providers/Microsoft.Web/sites/earthcommunity",
+    "appService.deploySubpath": "."
+}
