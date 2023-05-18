@@ -104,7 +104,6 @@ router.post('/group/add-member/:id/:userId', async (req: Request, res: Response)
     if (!group) {
       return res.status(404).json({ message: 'Grupo não encontrado' });
     }
-
     // Verifica se o userId já está presente no array memberIds
     if (UserExist) {
       return res.status(400).json({ message: 'Usuário já é membro deste grupo' });
@@ -119,17 +118,17 @@ router.post('/group/add-member/:id/:userId', async (req: Request, res: Response)
     res.status(500).json({ error: error });
   }
 });
-router.post('/group/remove-member/:id/:userId', async (req: Request, res: Response) => {
+router.delete('/group/remove-member/:id/:userId', async (req: Request, res: Response) => {
   const { id, userId } = req.params;
 
   try {
     const group = await Group.findById(id);
     const UserExist = await Group.findOne({ memberIds: userId })
     if (!group) {
-      return res.status(404).json({ message: 'Grupo não encontrado' });
+      return res.status(404).json({ error: 'Grupo não encontrado' });
     }
     if (!UserExist) {
-      return res.status(400).json({ message: 'Usuário não é membro deste grupo' });
+      return res.status(400).json({ error: 'Usuário não é membro deste grupo' });
     }
 
     await Group.findByIdAndUpdate(id, { $pull: { memberIds: userId } });
@@ -141,4 +140,34 @@ router.post('/group/remove-member/:id/:userId', async (req: Request, res: Respon
     res.status(500).json({ error: error });
   }
 });
+router.get('/search', async (req: Request, res: Response) => {
+  const name: string = req.query.name as string || '';
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 5;
+  const skip = (page - 1) * limit;
+
+  try {
+    const groupQuery = name ? { name: { $regex: new RegExp(name, 'i') } } : {}; // Pesquisa por nome do grupo
+    const userQuery = name ? { 'info.firstName': { $regex: new RegExp(name, 'i') } } : {}; // Pesquisa por nome do usuário
+
+    const [groupCount, userCount, groups, users] = await Promise.all([
+      Group.countDocuments(groupQuery),
+      Users.countDocuments(userQuery),
+      Group.find(groupQuery).skip(skip).limit(limit).lean(),
+      Users.find(userQuery).skip(skip).limit(limit).lean()
+    ]);
+
+    const groupPageCount = Math.ceil(groupCount / limit); // Número total de páginas para grupos
+    const userPageCount = Math.ceil(userCount / limit); // Número total de páginas para usuários
+
+    const result = [...users, ...groups]; // Junta os resultados em um único array, com usuários primeiro
+    const totalCount = groupCount + userCount; // Total de registros encontrados
+
+    res.status(200).json({ result, totalCount, groupCount, userCount, groupPageCount, userPageCount });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: error });
+  }
+});
+
 export default router;

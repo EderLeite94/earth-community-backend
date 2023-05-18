@@ -64,15 +64,30 @@ router.delete('/post/delete/:id', async (req: Request, res: Response) => {
 // Get all post
 router.get('/post/get-all', async (req: Request, res: Response) => {
     try {
-        const post = await Post.find();
-        res.status(201).json({
-            post
-        });
+      const { page, perPage } = req.query;
+      const pageNumber = parseInt(page as string) || 1;
+      const itemsPerPage = parseInt(perPage as string) || 10;
+  
+      const totalData = await Post.countDocuments();
+      const totalPages = Math.ceil(totalData / itemsPerPage);
+  
+      const posts = await Post.find()
+        .skip((pageNumber - 1) * itemsPerPage)
+        .limit(itemsPerPage);
+  
+      res.status(200).json({
+        posts,
+        page: pageNumber,
+        perPage: itemsPerPage,
+        totalPages,
+        totalData,
+      });
     } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ error: error });
+      console.error('Error:', error);
+      res.status(500).json({ error: error });
     }
-});
+  });
+  
 // Get - Post ID
 router.get('/post/get-by-id/:id', async (req: Request, res: Response) => {
     const id = req.params.id;

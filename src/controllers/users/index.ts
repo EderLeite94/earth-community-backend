@@ -1,68 +1,60 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import Users from '../../models/users/index';
 import { IUsers } from '../../models/users/index';
 import moment from 'moment';
+import Joi from 'joi';
+import signUpSchema from '../../validations/users/index';
 const router = express.Router();
-
-// Register users
-router.post('/auth/user/sign-up', async (req: Request, res: Response) => {
-    const { info, security } = req.body;
-    const { firstName, surname, email } = info;
-    const { password, confirmPassword } = security;
-
-    // create password
-    const salt = await bcrypt.genSalt(12);
-    const passwordHash = await bcrypt.hash(password, salt);
-
-    // Date Brazil
-    const data = new Date();
-    const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
-
-    if (!firstName) {
-        return res.status(400).send('O nome é obrigatorio!');
-    }
-    if (!surname) {
-        return res.status(400).send('O sobrenome é obrigatorio!');
-    }
-    if (!email) {
-        return res.status(400).send('O email é obrigatorio!');
-    }
-    if (!password) {
-        return res.status(422).json({ error: 'A senha é obrigatória!' });
-    }
-
-    if (password !== confirmPassword) {
-        return res.status(422).json({ error: 'As senhas não conferem!' });
-    }
-    // check if email exists
-    const emailExists = await Users.findOne({ 'info.email': email });
-    if (emailExists) {
-        return res.status(422).json({ error: 'E-mail já cadastrado!' });
-    }
-    const user = {
-        info: {
-            firstName,
-            surname,
-            email
-        },
-        security: {
-            password: passwordHash,
-            accountCreateDate: now
-        }
-    };
+//register
+router.post('/auth/user/sign-up', async (req: Request, res: Response, next: NextFunction) => {
     try {
+        const { info, security } = req.body;
+        const { firstName, surname, email } = info;
+        const { authWith, password, confirmPassword } = security;
+        // Validate input data
+        await signUpSchema.validateAsync({ ...info, ...security }, { abortEarly: false });
+        // Create password hash
+        const salt = await bcrypt.genSalt(12);
+        const passwordHash = await bcrypt.hash(password, salt);
+        // Get current date/time in Brazil timezone
+        const data = new Date();
+        const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
+        //check if email exists
+        const emailExists = await Users.findOne({ 'info.email': email });
+        if (emailExists) {
+            return res.status(422).json({ error: 'E-mail já cadastrado!' });
+        }
+        const user = {
+            info: {
+                firstName,
+                surname,
+                email
+            },
+            security: {
+                authWith,
+                password: passwordHash,
+                accountCreateDate: now
+            }
+        };
+        // Insert user in database
         await Users.create(user);
         res.status(201).json({
-            message: 'Usuario cadastrado com sucesso!',
+            message: 'Usuário cadastrado com sucesso!',
             user,
         });
     } catch (error) {
-        console.error('Error creating user:', error);
-        res.status(500).json({ error: error });
+        if (error instanceof Joi.ValidationError) {
+            const errors = error.details.map((err) => err.message);
+            return res.status(422).json({ error: errors });
+        } else {
+            console.error('Error creating user:', error);
+            return res.status(500).json({ error: (error as Error).message });
+        }
     }
 });
+
 //Login users
 router.post('/auth/user/sign-in', async (req: Request, res: Response) => {
     const { info, security } = req.body;
@@ -118,5 +110,4 @@ router.patch('/user/update-by-id/:id', async (req: Request, res: Response) => {
         res.status(500).json({ error: error });
     }
 });
-
 export default router
