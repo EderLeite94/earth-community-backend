@@ -3,7 +3,6 @@
     "version": "2",
     "public": true,
     "build": {
-        "buildCommand": "next build",
         "src": "dist/src/index.js",
         "use": "@vercel/node"
     },
