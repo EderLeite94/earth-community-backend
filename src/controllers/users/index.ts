@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express';
-import bcrypt from 'bcrypt';
+import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import Users from '../../models/users/index';
 import { IUsers } from '../../models/users/index';
@@ -16,8 +16,7 @@ router.post('/auth/user/sign-up', async (req: Request, res: Response, next: Next
         // Validate input data
         await signUpSchema.validateAsync({ ...info, ...security }, { abortEarly: false });
         // Create password hash
-        const salt = await bcrypt.genSalt(12);
-        const passwordHash = await bcrypt.hash(password, salt);
+        const passwordHash = await argon2.hash(password);
         // Get current date/time in Brazil timezone
         const data = new Date();
         const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
@@ -70,15 +69,16 @@ router.post('/auth/user/sign-in', async (req: Request, res: Response) => {
         return res.status(404).json({ message: 'Usuário não cadastrado!' })
     }
     // check if password match
-    const checkPassword: boolean = await bcrypt.compare(password, user.security.password)
+    const checkPassword: boolean = await argon2.verify(user.security.password, password);
     if (!checkPassword) {
-        return res.status(422).json({ message: 'Senha invalida!' })
+        return res.status(422).json({ message: 'Senha inválida!' })
     }
     try {
         const secret: string | undefined = process.env.SECRET;
-        const token: string = jwt.sign({
-            id: user.info._id,
-        },
+        const token: string = jwt.sign(
+            {
+                id: user.info._id,
+            },
             secret || '',
         );
         res.status(200).json({
@@ -91,6 +91,7 @@ router.post('/auth/user/sign-in', async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Aconteceu um erro no servidor, tente novamente mais tarde!' });
     }
 });
+
 // Update - User
 router.patch('/user/update-by-id/:id', async (req: Request, res: Response) => {
     moment.locale('pt-BR');
