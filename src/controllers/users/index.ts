@@ -1,5 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express';
-import argon2 from 'argon2';
+import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import Users from '../../models/users/index';
 import { IUsers } from '../../models/users/index';
@@ -7,7 +7,9 @@ import moment from 'moment';
 import Joi from 'joi';
 import signUpSchema from '../../validations/users/index';
 const router = express.Router();
-//register
+const bcrypt = require('bcryptjs');
+
+// Register
 router.post('/auth/user/sign-up', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { info, security } = req.body;
@@ -16,11 +18,12 @@ router.post('/auth/user/sign-up', async (req: Request, res: Response, next: Next
         // Validate input data
         await signUpSchema.validateAsync({ ...info, ...security }, { abortEarly: false });
         // Create password hash
-        const passwordHash = await argon2.hash(password);
+        const salt = bcrypt.genSaltSync(10);
+        const passwordHash = bcrypt.hashSync(password, salt);
         // Get current date/time in Brazil timezone
         const data = new Date();
         const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
-        //check if email exists
+        // Check if email exists
         const emailExists = await Users.findOne({ 'info.email': email });
         if (emailExists) {
             return res.status(422).json({ error: 'E-mail já cadastrado!' });
@@ -54,24 +57,24 @@ router.post('/auth/user/sign-up', async (req: Request, res: Response, next: Next
     }
 });
 
-//Login users
+// Login users
 router.post('/auth/user/sign-in', async (req: Request, res: Response) => {
     const { info, security } = req.body;
     const { email } = info;
-    const { password } = security
+    const { password } = security;
 
     if (!email) {
-        return res.status(422).json({ message: 'O e-mail é obrigatório!' })
+        return res.status(422).json({ message: 'O e-mail é obrigatório!' });
     }
-    //check if user exists
+    // Check if user exists
     const user: IUsers | null = await Users.findOne({ 'info.email': email });
     if (!user) {
-        return res.status(404).json({ message: 'Usuário não cadastrado!' })
+        return res.status(404).json({ message: 'Usuário não cadastrado!' });
     }
-    // check if password match
-    const checkPassword: boolean = await argon2.verify(user.security.password, password);
+    // Check if password matches
+    const checkPassword: boolean = bcrypt.compareSync(password, user.security.password);
     if (!checkPassword) {
-        return res.status(422).json({ message: 'Senha inválida!' })
+        return res.status(422).json({ message: 'Senha inválida!' });
     }
     try {
         const secret: string | undefined = process.env.SECRET;
@@ -85,12 +88,13 @@ router.post('/auth/user/sign-in', async (req: Request, res: Response) => {
             message: 'Usuário logado com sucesso',
             token,
             user
-        })
+        });
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: 'Aconteceu um erro no servidor, tente novamente mais tarde!' });
     }
 });
+
 
 // Update - User
 router.patch('/user/update-by-id/:id', async (req: Request, res: Response) => {
