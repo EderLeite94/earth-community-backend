@@ -72,6 +72,7 @@ router.get('/post/get-all', async (req: Request, res: Response) => {
       const totalPages = Math.ceil(totalData / itemsPerPage);
   
       const posts = await Post.find()
+        .sort({ 'likes.quantity': -1 }) // Sort by likes.quantity in descending order
         .skip((pageNumber - 1) * itemsPerPage)
         .limit(itemsPerPage);
   
@@ -86,8 +87,7 @@ router.get('/post/get-all', async (req: Request, res: Response) => {
       console.error('Error:', error);
       res.status(500).json({ error: error });
     }
-  });
-  
+  }); 
 // Get - Post ID
 router.get('/post/get-by-id/:id', async (req: Request, res: Response) => {
     const id = req.params.id;
