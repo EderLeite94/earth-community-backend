@@ -8,5 +8,8 @@
             "src": "/(.*)*",
             "dest": "dist/src/routes/index.js"
         }
-    ]
+    ],
+    "engines": {
+        "node": "14.x"
+    }
 }
