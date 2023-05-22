@@ -15,6 +15,7 @@ router.post('/group/create/:id', async (req, res) => {
     // Date Brazil
     const data = new Date();
     const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
+    const user = await index_2.default.findById(id);
     const group = {
         name,
         image,
@@ -24,7 +25,7 @@ router.post('/group/create/:id', async (req, res) => {
         memberIds: {
             userId: id,
         },
-        createdByUserId: id,
+        createdByUser: user,
         createdAt: now
     };
     if (!name) {
@@ -54,9 +55,9 @@ router.delete('/group/delete/:id/:userId', async (req, res) => {
         if (!group) {
             return res.status(404).json({ message: 'Grupo não encontrado' });
         }
-        if (group.createdByUserId !== userId) {
-            return res.status(401).json({ message: 'Você não tem permissão para excluir este grupo' });
-        }
+        // if (group.createdByUser !== userId) {
+        //   return res.status(401).json({ message: 'Você não tem permissão para excluir este grupo' });
+        // }
         await index_1.default.findByIdAndDelete(id);
         await index_2.default.updateMany({ $pull: { groupIds: id } });
         res.status(200).json({ message: 'Grupo excluído com sucesso' });
@@ -83,7 +84,7 @@ router.get('/group/get-all', async (req, res) => {
 router.get('/group/get-by-id/:id', async (req, res) => {
     const id = req.params;
     try {
-        const group = await index_1.default.findOne(id);
+        const group = await index_1.default.findOne({ id });
         res.status(201).json({
             group
         });
@@ -97,15 +98,15 @@ router.post('/group/add-member/:id/:userId', async (req, res) => {
     const { id, userId } = req.params;
     try {
         const group = await index_1.default.findById(id);
-        const UserExist = await index_1.default.findOne({ memberIds: userId });
         if (!group) {
             return res.status(404).json({ message: 'Grupo não encontrado' });
         }
         // Verifica se o userId já está presente no array memberIds
-        if (UserExist) {
+        const userExists = await index_2.default.findOne({ groupIds: id });
+        if (userExists) {
             return res.status(400).json({ message: 'Usuário já é membro deste grupo' });
         }
-        await index_1.default.findByIdAndUpdate(id, { $addToSet: { memberIds: userId } });
+        await index_1.default.findByIdAndUpdate(id, { $addToSet: { memberIds: { userId } } });
         await index_2.default.findByIdAndUpdate(userId, { $addToSet: { groupIds: id } });
         res.status(200).json({ message: 'Usuário adicionado com sucesso' });
     }

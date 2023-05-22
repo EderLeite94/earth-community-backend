@@ -15,10 +15,11 @@ router.post('/post/create/:id', async (req, res) => {
     // Date Brazil
     const data = new Date();
     const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
+    const user = await index_2.default.findById(id);
     const post = {
         text,
         image,
-        createdByUserId: id,
+        createdByUser: user,
         createdAt: now
     };
     if (!text) {
@@ -65,6 +66,7 @@ router.get('/post/get-all', async (req, res) => {
         const totalData = await index_1.default.countDocuments();
         const totalPages = Math.ceil(totalData / itemsPerPage);
         const posts = await index_1.default.find()
+            .sort({ 'likes.quantity': -1 }) // Sort by likes.quantity in descending order
             .skip((pageNumber - 1) * itemsPerPage)
             .limit(itemsPerPage);
         res.status(200).json({
@@ -132,7 +134,7 @@ router.post('/post/comment/:id/:userId', async (req, res) => {
             return res.status(404).send('Post não encontrado');
         }
         post.comments.push({
-            userId, comment, id_comments: new mongoose_1.default.Types.ObjectId()
+            userId, comment, id_comment: new mongoose_1.default.Types.ObjectId()
         });
         await post.save();
         res.status(200).send('Comentário adicionado com sucesso');
@@ -143,14 +145,14 @@ router.post('/post/comment/:id/:userId', async (req, res) => {
     }
 });
 //delete comment
-router.delete('/post/delete-comment/:id/:id_comments', async (req, res) => {
-    const { id, id_comments } = req.params;
+router.delete('/post/delete-comment/:id/:id_comment', async (req, res) => {
+    const { id, id_comment } = req.params;
     try {
         const post = await index_1.default.findById(id);
         if (!post) {
             return res.status(404).send('Post não encontrado');
         }
-        const commentIndex = post.comments.findIndex((comment) => String(comment.id_comments) === id_comments);
+        const commentIndex = post.comments.findIndex((comment) => String(comment.id_comment) === id_comment);
         if (commentIndex === -1) {
             return res.status(404).send('Comentário não encontrado');
         }

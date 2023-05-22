@@ -12,7 +12,27 @@ export interface IGroup {
     memberIds: Array<{
         userId: string;
     }>
-    createdByUserId: string;
+    createdByUser: {
+        info: {
+            _id: any;
+            firstName: string;
+            surname: string;
+            email: string;
+            dateOfBirth: Date;
+            phone: string;
+        };
+        security: {
+            authWith: 'google' | 'facebook' | 'manually';
+            password: string;
+            accountCreateDate: Date;
+        };
+        address: {
+            city: string;
+            state: string;
+        };
+        groupIds: string[];
+        donationIds: number[];
+    };
     createdAt: Date;
 }
 
@@ -30,9 +50,28 @@ const GroupSchema: Schema = new Schema({
     memberIds: Array<{
         userId: { type: String },
     }>,
-    createdByUserId: { type: String },
+    createdByUser: {
+        info: {
+            firstName: { type: String, required: true },
+            surname: { type: String, required: true },
+            email: { type: String, required: true, unique: true },
+            dateOfBirth: { type: Date },
+            phone: { type: String },
+        },
+        security: {
+            authWith: { type: String, enum: ['google', 'facebook', 'manually'] },
+            password: { type: String },
+            accountCreateDate: { type: Date },
+        },
+        address: {
+            city: { type: String },
+            state: { type: String },
+        },
+        groupIds: [{ type: String }],
+        donationIds: [{ type: Number }],
+    },
     createdAt: { type: Date },
-   
+
 });
 export interface IGroupId extends IGroup {
     _id: string;

@@ -7,9 +7,10 @@ const express_1 = __importDefault(require("express"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const index_1 = __importDefault(require("../../models/users/index"));
+const index_2 = __importDefault(require("../../models/group/index"));
 const moment_1 = __importDefault(require("moment"));
 const joi_1 = __importDefault(require("joi"));
-const index_2 = __importDefault(require("../../validations/users/index"));
+const index_3 = __importDefault(require("../../validations/users/index"));
 const router = express_1.default.Router();
 //register
 router.post('/auth/user/sign-up', async (req, res, next) => {
@@ -18,7 +19,7 @@ router.post('/auth/user/sign-up', async (req, res, next) => {
         const { firstName, surname, email } = info;
         const { authWith, password, confirmPassword } = security;
         // Validate input data
-        await index_2.default.validateAsync(Object.assign(Object.assign({}, info), security), { abortEarly: false });
+        await index_3.default.validateAsync(Object.assign(Object.assign({}, info), security), { abortEarly: false });
         // Create password hash
         const salt = await bcrypt_1.default.genSalt(12);
         const passwordHash = await bcrypt_1.default.hash(password, salt);
@@ -68,17 +69,19 @@ router.post('/auth/user/sign-in', async (req, res) => {
     if (!email) {
         return res.status(422).json({ message: 'O e-mail é obrigatório!' });
     }
-    //check if user exists
-    const user = await index_1.default.findOne({ 'info.email': email });
-    if (!user) {
-        return res.status(404).json({ message: 'Usuário não cadastrado!' });
-    }
-    // check if password match
-    const checkPassword = await bcrypt_1.default.compare(password, user.security.password);
-    if (!checkPassword) {
-        return res.status(422).json({ message: 'Senha invalida!' });
-    }
     try {
+        // Check if user exists
+        const user = await index_1.default.findOne({ 'info.email': email });
+        if (!user) {
+            return res.status(404).json({ message: 'Usuário não cadastrado!' });
+        }
+        // Check if password matches
+        const checkPassword = await bcrypt_1.default.compare(password, user.security.password);
+        if (!checkPassword) {
+            return res.status(422).json({ message: 'Senha inválida!' });
+        }
+        // Fetch group information based on groupIds
+        const groups = await index_2.default.find({ _id: { $in: user.groupIds } });
         const secret = process.env.SECRET;
         const token = jsonwebtoken_1.default.sign({
             id: user.info._id,
@@ -86,7 +89,8 @@ router.post('/auth/user/sign-in', async (req, res) => {
         res.status(200).json({
             message: 'Usuário logado com sucesso',
             token,
-            user
+            user,
+            groups
         });
     }
     catch (error) {

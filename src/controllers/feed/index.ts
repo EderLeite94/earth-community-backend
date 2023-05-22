@@ -16,11 +16,12 @@ router.post('/post/create/:id', async (req: Request, res: Response) => {
     // Date Brazil
     const data = new Date();
     const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
+    const user = await Users.findById(id)
 
     const post = {
         text,
         image,
-        createdByUserId: id,
+        createdByUser: user,
         createdAt: now
     }
 
@@ -147,7 +148,7 @@ router.post('/post/comment/:id/:userId', async (req: Request, res: Response) => 
             return res.status(404).send('Post não encontrado');
         }
         post.comments.push({
-            userId, comment, id_comments: new mongoose.Types.ObjectId()
+            userId, comment, id_comment: new mongoose.Types.ObjectId()
         });
         await post.save();
         res.status(200).send('Comentário adicionado com sucesso');
@@ -157,8 +158,8 @@ router.post('/post/comment/:id/:userId', async (req: Request, res: Response) => 
     }
 });
 //delete comment
-router.delete('/post/delete-comment/:id/:id_comments', async (req: Request, res: Response) => {
-    const { id, id_comments } = req.params;
+router.delete('/post/delete-comment/:id/:id_comment', async (req: Request, res: Response) => {
+    const { id, id_comment } = req.params;
 
     try {
         const post = await Post.findById(id);
@@ -166,7 +167,7 @@ router.delete('/post/delete-comment/:id/:id_comments', async (req: Request, res:
             return res.status(404).send('Post não encontrado');
         }
 
-        const commentIndex = post.comments.findIndex((comment) => String(comment.id_comments) === id_comments);
+        const commentIndex = post.comments.findIndex((comment) => String(comment.id_comment) === id_comment);
         if (commentIndex === -1) {
             return res.status(404).send('Comentário não encontrado');
         }

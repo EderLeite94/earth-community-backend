@@ -34,7 +34,26 @@ const GroupSchema = new mongoose_1.Schema({
         state: { type: String },
     },
     memberIds: (Array),
-    createdByUserId: { type: String },
+    createdByUser: {
+        info: {
+            firstName: { type: String, required: true },
+            surname: { type: String, required: true },
+            email: { type: String, required: true, unique: true },
+            dateOfBirth: { type: Date },
+            phone: { type: String },
+        },
+        security: {
+            authWith: { type: String, enum: ['google', 'facebook', 'manually'] },
+            password: { type: String },
+            accountCreateDate: { type: Date },
+        },
+        address: {
+            city: { type: String },
+            state: { type: String },
+        },
+        groupIds: [{ type: String }],
+        donationIds: [{ type: Number }],
+    },
     createdAt: { type: Date },
 });
 const Group = mongoose_1.default.model('Group', GroupSchema);
