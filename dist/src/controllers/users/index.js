@@ -41,14 +41,14 @@ router.post('/auth/user/sign-up', index_2.validateSignUp, async (req, res, next)
         };
         // Insert user in database
         await index_1.default.create(user);
-        console.log('User created:', user); // Log the created user
+        // console.log('User created:', user); // Log the created user
         res.status(201).json({
             message: 'Usuário cadastrado com sucesso!',
             user,
         });
     }
     catch (error) {
-        console.error('Error creating user:', error);
+        // console.error('Error creating user:', error);
         return res.status(500).json({ error: 'Erro ao criar usuário' });
     }
 });

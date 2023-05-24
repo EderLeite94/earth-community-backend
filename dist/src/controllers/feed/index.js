@@ -131,23 +131,26 @@ router.post('/post/comment/:id/:userId', async (req, res) => {
     try {
         const post = await index_1.default.findById(id);
         if (!post) {
-            return res.status(404).send('Post não encontrado');
+            return res.status(404).send({ error: 'Post não encontrado' });
         }
         const user = await index_2.default.findOne({ userId });
         if (!user) {
-            return res.status(404).send('Usuário não encontrado');
+            return res.status(404).send({ error: 'Usuário não encontrado' });
+        }
+        if (!comment) {
+            return res.status(404).send({ error: 'Insira um comentario!' });
         }
         post.comments.push({
             user: user,
             comment,
-            commentId: new mongoose_1.default.Types.ObjectId()
+            commentId: { _id: new mongoose_1.default.Types.ObjectId() }
         });
         await post.save();
-        res.status(200).send('Comentário adicionado com sucesso');
+        res.status(200).send({ message: 'Comentário adicionado com sucesso' });
     }
     catch (err) {
         console.error(err);
-        res.status(500).send('Erro ao adicionar comentário');
+        res.status(500).send({ error: 'Erro ao adicionar comentário' });
     }
 });
 //delete comment

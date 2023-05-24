@@ -9,7 +9,9 @@ export interface IFeed {
         userIds: string[];
     };
     comments: Array<{
-        commentId?: mongoose.Types.ObjectId | undefined | string;
+        commentId?: {
+            _id: mongoose.Types.ObjectId | undefined | string;
+        };
         user: {
             info: {
                 _id: any;
@@ -65,12 +67,14 @@ const FeedSchema: Schema = new Schema({
         userIds: { type: [String], default: [] },
     },
     comments: Array<{
-        commentId: { type: mongoose.Schema.Types.ObjectId },
+        commentId: {
+            _id: { type: mongoose.Schema.Types.ObjectId },
+        },
         user: {
             info: {
-                firstName: { type: String},
-                surname: { type: String},
-                email: { type: String},
+                firstName: { type: String },
+                surname: { type: String },
+                email: { type: String },
                 dateOfBirth: { type: Date },
                 phone: { type: String },
             },
@@ -88,8 +92,8 @@ const FeedSchema: Schema = new Schema({
     }>,
     createdByUser: {
         info: {
-            firstName: { type: String},
-            surname: { type: String},
+            firstName: { type: String },
+            surname: { type: String },
             email: { type: String },
             dateOfBirth: { type: Date },
             phone: { type: String },
