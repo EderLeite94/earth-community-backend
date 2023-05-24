@@ -15,7 +15,7 @@ router.post('/post/create/:id', async (req, res) => {
     // Date Brazil
     const data = new Date();
     const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
-    const user = await index_2.default.findById(id);
+    const user = await index_2.default.findOne({ _id: id });
     const post = {
         text,
         image,
@@ -27,7 +27,7 @@ router.post('/post/create/:id', async (req, res) => {
     }
     const UserId = await index_2.default.findOne({ _id: id }, req.body);
     if (!UserId) {
-        return res.status(400).send('Usuário invalido!');
+        return res.status(400).send('Usuário inválido!');
     }
     try {
         await index_1.default.create(post);

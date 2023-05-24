@@ -34,9 +34,9 @@ const FeedSchema = new mongoose_1.Schema({
     comments: (Array),
     createdByUser: {
         info: {
-            firstName: { type: String, required: true },
-            surname: { type: String, required: true },
-            email: { type: String, required: true, unique: true },
+            firstName: { type: String },
+            surname: { type: String },
+            email: { type: String },
             dateOfBirth: { type: Date },
             phone: { type: String },
         },

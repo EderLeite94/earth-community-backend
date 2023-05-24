@@ -12,7 +12,7 @@ const index_2 = require("../../validations/users/index");
 const group_1 = __importDefault(require("../../models/group"));
 const router = express_1.default.Router();
 //register
-router.post('/auth/user/sign-up', index_2.validateSignUp, async (req, res) => {
+router.post('/auth/user/sign-up', index_2.validateSignUp, async (req, res, next) => {
     try {
         const { info, security } = req.body;
         const { firstName, surname, email } = info;
@@ -23,6 +23,10 @@ router.post('/auth/user/sign-up', index_2.validateSignUp, async (req, res) => {
         // Get current date/time in Brazil timezone
         const data = new Date();
         const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
+        const userExist = await index_1.default.findOne({ 'info.email': email });
+        if (userExist) {
+            return res.status(422).json({ error: 'E-mail já cadastrado!' });
+        }
         const user = {
             info: {
                 firstName,
@@ -37,6 +41,7 @@ router.post('/auth/user/sign-up', index_2.validateSignUp, async (req, res) => {
         };
         // Insert user in database
         await index_1.default.create(user);
+        console.log('User created:', user); // Log the created user
         res.status(201).json({
             message: 'Usuário cadastrado com sucesso!',
             user,
@@ -44,7 +49,7 @@ router.post('/auth/user/sign-up', index_2.validateSignUp, async (req, res) => {
     }
     catch (error) {
         console.error('Error creating user:', error);
-        return res.status(500).json({ error: error });
+        return res.status(500).json({ error: 'Erro ao criar usuário' });
     }
 });
 //Login users

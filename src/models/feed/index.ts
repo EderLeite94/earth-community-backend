@@ -68,9 +68,9 @@ const FeedSchema: Schema = new Schema({
         commentId: { type: mongoose.Schema.Types.ObjectId },
         user: {
             info: {
-                firstName: { type: String, required: true },
-                surname: { type: String, required: true },
-                email: { type: String, required: true, unique: true },
+                firstName: { type: String},
+                surname: { type: String},
+                email: { type: String},
                 dateOfBirth: { type: Date },
                 phone: { type: String },
             },
@@ -88,9 +88,9 @@ const FeedSchema: Schema = new Schema({
     }>,
     createdByUser: {
         info: {
-            firstName: { type: String, required: true },
-            surname: { type: String, required: true },
-            email: { type: String, required: true, unique: true },
+            firstName: { type: String},
+            surname: { type: String},
+            email: { type: String },
             dateOfBirth: { type: Date },
             phone: { type: String },
         },
@@ -109,7 +109,8 @@ const FeedSchema: Schema = new Schema({
     createdByGroupId: { type: Number },
     createdAt: { type: Date }
 });
-export interface IFeedithId extends IFeed {
+
+export interface IFeedWithId extends IFeed {
     _id: string;
 }
 

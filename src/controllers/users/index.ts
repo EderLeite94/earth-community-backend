@@ -1,13 +1,14 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import Users, { IUsers } from '../../models/users/index';
 import bcrypt from 'bcrypt';
 import moment from 'moment';
+import Joi from 'joi';
 import jwt from 'jsonwebtoken';
 import { validateSignUp } from '../../validations/users/index';
 import Group from '../../models/group';
 const router = express.Router();
 //register
-router.post('/auth/user/sign-up', validateSignUp, async (req: Request, res: Response) => {
+router.post('/auth/user/sign-up', validateSignUp, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { info, security } = req.body;
     const { firstName, surname, email } = info;
@@ -20,7 +21,10 @@ router.post('/auth/user/sign-up', validateSignUp, async (req: Request, res: Resp
     // Get current date/time in Brazil timezone
     const data = new Date();
     const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
-
+    const userExist = await Users.findOne({ 'info.email': email })
+    if(userExist){
+      return res.status(422).json({ error: 'E-mail já cadastrado!' });
+    }
     const user = {
       info: {
         firstName,
@@ -33,17 +37,20 @@ router.post('/auth/user/sign-up', validateSignUp, async (req: Request, res: Resp
         accountCreateDate: now
       }
     };
+
     // Insert user in database
     await Users.create(user);
+    // console.log('User created:', user); // Log the created user
     res.status(201).json({
       message: 'Usuário cadastrado com sucesso!',
       user,
     });
   } catch (error) {
-    console.error('Error creating user:', error);
-    return res.status(500).json({ error: error });
+    // console.error('Error creating user:', error);
+    return res.status(500).json({ error: 'Erro ao criar usuário' });
   }
 });
+
 //Login users
 router.post('/auth/user/sign-in', async (req: Request, res: Response) => {
   const { info, security } = req.body;

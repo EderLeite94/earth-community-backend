@@ -5,8 +5,6 @@ import Image from '../../models/feed/index'
 import Users from '../../models/users/index';
 import * as path from 'path';
 import mongoose from 'mongoose';
-import { ObjectId } from 'mongodb';
-
 const router = express.Router();
 
 // Create post
@@ -16,7 +14,7 @@ router.post('/post/create/:id', async (req: Request, res: Response) => {
     // Date Brazil
     const data = new Date();
     const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
-    const user = await Users.findById(id)
+    const user = await Users.findOne({ _id: id })
 
     const post = {
         text,
@@ -30,7 +28,7 @@ router.post('/post/create/:id', async (req: Request, res: Response) => {
     }
     const UserId = await Users.findOne({ _id: id }, req.body);
     if (!UserId) {
-        return res.status(400).send('Usuário invalido!');
+        return res.status(400).send('Usuário inválido!');
     }
 
     try {
@@ -44,6 +42,7 @@ router.post('/post/create/:id', async (req: Request, res: Response) => {
         res.status(500).json({ error: error });
     }
 });
+
 //Delete post 
 router.delete('/post/delete/:id', async (req: Request, res: Response) => {
     const id: string = req.params.id;
