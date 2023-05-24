@@ -1,32 +1,26 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response } from 'express';
+import Users, { IUsers } from '../../models/users/index';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import Users from '../../models/users/index';
-import { IUsers } from '../../models/users/index';
-import Group from '../../models/group/index';
 import moment from 'moment';
-import Joi from 'joi';
-import signUpSchema from '../../validations/users/index';
+import jwt from 'jsonwebtoken';
+import { validateSignUp } from '../../validations/users/index';
+import Group from '../../models/group';
 const router = express.Router();
 //register
-router.post('/auth/user/sign-up', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/auth/user/sign-up', validateSignUp, async (req: Request, res: Response) => {
   try {
     const { info, security } = req.body;
     const { firstName, surname, email } = info;
     const { authWith, password, confirmPassword } = security;
-    // Validate input data
-    await signUpSchema.validateAsync({ ...info, ...security }, { abortEarly: false });
+
     // Create password hash
     const salt = await bcrypt.genSalt(12);
     const passwordHash = await bcrypt.hash(password, salt);
+
     // Get current date/time in Brazil timezone
     const data = new Date();
     const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
-    //check if email exists
-    const emailExists = await Users.findOne({ 'info.email': email });
-    if (emailExists) {
-      return res.status(422).json({ error: 'E-mail já cadastrado!' });
-    }
+
     const user = {
       info: {
         firstName,
@@ -46,16 +40,10 @@ router.post('/auth/user/sign-up', async (req: Request, res: Response, next: Next
       user,
     });
   } catch (error) {
-    if (error instanceof Joi.ValidationError) {
-      const errors = error.details.map((err) => err.message);
-      return res.status(422).json({ error: errors });
-    } else {
-      console.error('Error creating user:', error);
-      return res.status(500).json({ error: (error as Error).message });
-    }
+    console.error('Error creating user:', error);
+    return res.status(500).json({ error: error });
   }
 });
-
 //Login users
 router.post('/auth/user/sign-in', async (req: Request, res: Response) => {
   const { info, security } = req.body;
@@ -97,17 +85,16 @@ router.post('/auth/user/sign-in', async (req: Request, res: Response) => {
       groups
     });
   } catch (error) {
-  console.log(error);
-  res.status(500).json({ message: 'Aconteceu um erro no servidor, tente novamente mais tarde!' });
-}
+    console.log(error);
+    res.status(500).json({ message: 'Aconteceu um erro no servidor, tente novamente mais tarde!' });
+  }
 });
-
 // Update - User
 router.patch('/user/update-by-id/:id', async (req: Request, res: Response) => {
   moment.locale('pt-BR');
   const id: string = req.params.id;
   const { info, address } = req.body;
-  const { firstName, surname, email, dateOfBirth, phone } = info;
+  const { firstName, surname, email, dateOfBirth, pictureProfile, phone } = info;
   const isoDate = moment(dateOfBirth, 'DD/MM/YYYY', true).toDate();
   info.dateOfBirth = isoDate;
   const { city, state } = address

@@ -9,13 +9,30 @@ export interface IFeed {
         userIds: string[];
     };
     comments: Array<{
-        id_comment?: mongoose.Types.ObjectId | undefined | string;
-        userId: string;
+        commentId?: mongoose.Types.ObjectId | undefined | string;
+        user: {
+            info: {
+                _id: any;
+                firstName: string;
+                surname: string;
+                email: string;
+                dateOfBirth: Date;
+                phone: string;
+            };
+            security: {
+                authWith: 'google' | 'facebook' | 'manually';
+                password: string;
+                accountCreateDate: Date;
+            };
+            address: {
+                city: string;
+                state: string;
+            };
+        }
         comment: string;
     }>;
     createdByUser: {
         info: {
-            _id: any;
             firstName: string;
             surname: string;
             email: string;
@@ -48,8 +65,25 @@ const FeedSchema: Schema = new Schema({
         userIds: { type: [String], default: [] },
     },
     comments: Array<{
-        id_comment: { type: mongoose.Schema.Types.ObjectId },
-        userId: { type: String },
+        commentId: { type: mongoose.Schema.Types.ObjectId },
+        user: {
+            info: {
+                firstName: { type: String, required: true },
+                surname: { type: String, required: true },
+                email: { type: String, required: true, unique: true },
+                dateOfBirth: { type: Date },
+                phone: { type: String },
+            },
+            security: {
+                authWith: { type: String, enum: ['google', 'facebook', 'manually'] },
+                password: { type: String },
+                accountCreateDate: { type: Date },
+            },
+            address: {
+                city: { type: String },
+                state: { type: String },
+            },
+        },
         comment: { type: String },
     }>,
     createdByUser: {

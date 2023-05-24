@@ -65,30 +65,30 @@ router.delete('/post/delete/:id', async (req: Request, res: Response) => {
 // Get all post
 router.get('/post/get-all', async (req: Request, res: Response) => {
     try {
-      const { page, perPage } = req.query;
-      const pageNumber = parseInt(page as string) || 1;
-      const itemsPerPage = parseInt(perPage as string) || 10;
-  
-      const totalData = await Post.countDocuments();
-      const totalPages = Math.ceil(totalData / itemsPerPage);
-  
-      const posts = await Post.find()
-        .sort({ 'likes.quantity': -1 }) // Sort by likes.quantity in descending order
-        .skip((pageNumber - 1) * itemsPerPage)
-        .limit(itemsPerPage);
-  
-      res.status(200).json({
-        posts,
-        page: pageNumber,
-        perPage: itemsPerPage,
-        totalPages,
-        totalData,
-      });
+        const { page, perPage } = req.query;
+        const pageNumber = parseInt(page as string) || 1;
+        const itemsPerPage = parseInt(perPage as string) || 10;
+
+        const totalData = await Post.countDocuments();
+        const totalPages = Math.ceil(totalData / itemsPerPage);
+
+        const posts = await Post.find()
+            .sort({ 'likes.quantity': -1 }) // Sort by likes.quantity in descending order
+            .skip((pageNumber - 1) * itemsPerPage)
+            .limit(itemsPerPage);
+
+        res.status(200).json({
+            posts,
+            page: pageNumber,
+            perPage: itemsPerPage,
+            totalPages,
+            totalData,
+        });
     } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ error: error });
+        console.error('Error:', error);
+        res.status(500).json({ error: error });
     }
-  }); 
+});
 // Get - Post ID
 router.get('/post/get-by-id/:id', async (req: Request, res: Response) => {
     const id = req.params.id;
@@ -147,8 +147,14 @@ router.post('/post/comment/:id/:userId', async (req: Request, res: Response) => 
         if (!post) {
             return res.status(404).send('Post não encontrado');
         }
+        const user = await Users.findOne({ userId })
+        if (!user) {
+            return res.status(404).send('Usuário não encontrado');
+        }
         post.comments.push({
-            userId, comment, id_comment: new mongoose.Types.ObjectId()
+            user: user,
+            comment,
+            commentId: new mongoose.Types.ObjectId()
         });
         await post.save();
         res.status(200).send('Comentário adicionado com sucesso');
@@ -159,7 +165,7 @@ router.post('/post/comment/:id/:userId', async (req: Request, res: Response) => 
 });
 //delete comment
 router.delete('/post/delete-comment/:id/:id_comment', async (req: Request, res: Response) => {
-    const { id, id_comment } = req.params;
+    const { id, commentId } = req.params;
 
     try {
         const post = await Post.findById(id);
@@ -167,7 +173,7 @@ router.delete('/post/delete-comment/:id/:id_comment', async (req: Request, res: 
             return res.status(404).send('Post não encontrado');
         }
 
-        const commentIndex = post.comments.findIndex((comment) => String(comment.id_comment) === id_comment);
+        const commentIndex = post.comments.findIndex((comment) => String(comment.commentId) === commentId);
         if (commentIndex === -1) {
             return res.status(404).send('Comentário não encontrado');
         }

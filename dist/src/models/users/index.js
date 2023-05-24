@@ -30,6 +30,7 @@ const UsersSchema = new mongoose_1.Schema({
         surname: { type: String, required: true },
         email: { type: String, required: true, unique: true },
         dateOfBirth: { type: Date },
+        pictureProfile: { type: String },
         phone: { type: String },
     },
     security: {

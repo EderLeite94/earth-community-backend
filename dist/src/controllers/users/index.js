@@ -4,33 +4,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const bcrypt_1 = __importDefault(require("bcrypt"));
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const index_1 = __importDefault(require("../../models/users/index"));
-const index_2 = __importDefault(require("../../models/group/index"));
+const bcrypt_1 = __importDefault(require("bcrypt"));
 const moment_1 = __importDefault(require("moment"));
-const joi_1 = __importDefault(require("joi"));
-const index_3 = __importDefault(require("../../validations/users/index"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const index_2 = require("../../validations/users/index");
+const group_1 = __importDefault(require("../../models/group"));
 const router = express_1.default.Router();
 //register
-router.post('/auth/user/sign-up', async (req, res, next) => {
+router.post('/auth/user/sign-up', index_2.validateSignUp, async (req, res) => {
     try {
         const { info, security } = req.body;
         const { firstName, surname, email } = info;
         const { authWith, password, confirmPassword } = security;
-        // Validate input data
-        await index_3.default.validateAsync(Object.assign(Object.assign({}, info), security), { abortEarly: false });
         // Create password hash
         const salt = await bcrypt_1.default.genSalt(12);
         const passwordHash = await bcrypt_1.default.hash(password, salt);
         // Get current date/time in Brazil timezone
         const data = new Date();
         const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
-        //check if email exists
-        const emailExists = await index_1.default.findOne({ 'info.email': email });
-        if (emailExists) {
-            return res.status(422).json({ error: 'E-mail já cadastrado!' });
-        }
         const user = {
             info: {
                 firstName,
@@ -51,14 +43,8 @@ router.post('/auth/user/sign-up', async (req, res, next) => {
         });
     }
     catch (error) {
-        if (error instanceof joi_1.default.ValidationError) {
-            const errors = error.details.map((err) => err.message);
-            return res.status(422).json({ error: errors });
-        }
-        else {
-            console.error('Error creating user:', error);
-            return res.status(500).json({ error: error.message });
-        }
+        console.error('Error creating user:', error);
+        return res.status(500).json({ error: error });
     }
 });
 //Login users
@@ -81,7 +67,7 @@ router.post('/auth/user/sign-in', async (req, res) => {
             return res.status(422).json({ message: 'Senha inválida!' });
         }
         // Fetch group information based on groupIds
-        const groups = await index_2.default.find({ _id: { $in: user.groupIds } });
+        const groups = await group_1.default.find({ _id: { $in: user.groupIds } });
         const secret = process.env.SECRET;
         const token = jsonwebtoken_1.default.sign({
             id: user.info._id,
@@ -103,7 +89,7 @@ router.patch('/user/update-by-id/:id', async (req, res) => {
     moment_1.default.locale('pt-BR');
     const id = req.params.id;
     const { info, address } = req.body;
-    const { firstName, surname, email, dateOfBirth, phone } = info;
+    const { firstName, surname, email, dateOfBirth, pictureProfile, phone } = info;
     const isoDate = (0, moment_1.default)(dateOfBirth, 'DD/MM/YYYY', true).toDate();
     info.dateOfBirth = isoDate;
     const { city, state } = address;
