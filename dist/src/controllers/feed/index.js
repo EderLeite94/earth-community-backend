@@ -143,7 +143,7 @@ router.post('/post/comment/:id/:userId', async (req, res) => {
         post.comments.push({
             user: user,
             comment,
-            commentId: { _id: new mongoose_1.default.Types.ObjectId() }
+            _id: new mongoose_1.default.Types.ObjectId()
         });
         await post.save();
         res.status(200).send({ message: 'Comentário adicionado com sucesso' });
@@ -161,7 +161,7 @@ router.delete('/post/delete-comment/:id/:id_comment', async (req, res) => {
         if (!post) {
             return res.status(404).send('Post não encontrado');
         }
-        const commentIndex = post.comments.findIndex((comment) => String(comment.commentId) === commentId);
+        const commentIndex = post.comments.findIndex((comment) => String(comment._id) === commentId);
         if (commentIndex === -1) {
             return res.status(404).send('Comentário não encontrado');
         }
