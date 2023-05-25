@@ -23,7 +23,6 @@ router.post('/auth/user/sign-up', index_2.validateSignUp, async (req, res, next)
         // Get current date/time in Brazil timezone
         const data = new Date();
         const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
-      
         const User = {
             info: {
                 firstName,

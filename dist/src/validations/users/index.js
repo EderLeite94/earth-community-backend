@@ -37,7 +37,6 @@ const validateSignUp = async (req, res, next) => {
         await signUpSchema.validateAsync(req.body);
         console.log(req.body);
         // Verificar se o e-mail já está cadastrado
-
         const { email } = req.body.info;
         const emailExists = await index_1.default.findOne({ 'info.email': email });
         if (emailExists) {

@@ -30,6 +30,7 @@ export interface IFeed {
             };
         }
         comment: string;
+        createdAt: Date;
     }>;
     createdByUser: {
         info: {
@@ -87,6 +88,7 @@ const FeedSchema: Schema = new Schema({
             },
         },
         comment: { type: String },
+        createdAt: { type: Date },
     }>,
     createdByUser: {
         info: {

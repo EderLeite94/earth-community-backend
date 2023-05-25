@@ -129,6 +129,8 @@ router.post('/post/comment/:id/:userId', async (req, res) => {
     const { id, userId } = req.params;
     const { comment } = req.body;
     try {
+        const data = new Date();
+        const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
         const post = await index_1.default.findById(id);
         if (!post) {
             return res.status(404).send({ error: 'Post não encontrado' });
@@ -143,6 +145,7 @@ router.post('/post/comment/:id/:userId', async (req, res) => {
         post.comments.push({
             user: user,
             comment,
+            createdAt: now,
             _id: new mongoose_1.default.Types.ObjectId()
         });
         await post.save();
