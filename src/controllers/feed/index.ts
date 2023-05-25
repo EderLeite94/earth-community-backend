@@ -165,8 +165,8 @@ router.post('/post/comment/:id/:userId', async (req: Request, res: Response) => 
     }
 });
 //delete comment
-router.delete('/post/delete-comment/:id/:id_comment', async (req: Request, res: Response) => {
-    const { id, commentId } = req.params;
+router.delete('/post/delete-comment/:id/:id_comments', async (req: Request, res: Response) => {
+    const { id, id_comments } = req.params;
 
     try {
         const post = await Post.findById(id);
@@ -174,18 +174,18 @@ router.delete('/post/delete-comment/:id/:id_comment', async (req: Request, res: 
             return res.status(404).send('Post não encontrado');
         }
 
-        const commentIndex = post.comments.findIndex((comment) => String(comment._id) === commentId);
+        const commentIndex = post.comments.findIndex((comment) => String(comment._id) === id_comments);
         if (commentIndex === -1) {
             return res.status(404).send('Comentário não encontrado');
         }
 
         post.comments.splice(commentIndex, 1);
-        await post.save();
+
+        await post.updateOne({ comments: post.comments });
         res.status(200).send('Comentário removido com sucesso');
     } catch (err) {
         console.error(err);
         res.status(500).send('Erro ao remover comentário');
     }
 });
-
 export default router

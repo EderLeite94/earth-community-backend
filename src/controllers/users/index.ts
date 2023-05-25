@@ -33,7 +33,6 @@ router.post('/auth/user/sign-up', validateSignUp, async (req: Request, res: Resp
         accountCreateDate: now
       }
     };
-
     // Insert user in database
     await Users.create(User);
     const user = await Users.findOne({ 'info.email': email });
