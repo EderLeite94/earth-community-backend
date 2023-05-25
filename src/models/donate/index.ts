@@ -2,7 +2,7 @@ import mongoose, { Document, Schema, Types } from 'mongoose';
 type ObjectId = Types.ObjectId;
 
 export interface IDonate {
-    trnansaction_id: number;
+    transaction_id: number;
     transaction_amount: number;
     description: string;
     payment_method_id: string;

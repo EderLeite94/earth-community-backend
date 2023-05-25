@@ -49,7 +49,7 @@ router.post('/donation/:userId?', async (req: Request, res: Response) => {
         };
         const payment = await mercadopago.payment.create(payment_data);
         const donate = {
-            trnansaction_id: payment.body.id,
+            transaction_id: payment.body.id,
             transaction_amount,
             description,
             payment_method_id: "pix",
