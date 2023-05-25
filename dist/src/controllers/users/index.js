@@ -23,11 +23,7 @@ router.post('/auth/user/sign-up', index_2.validateSignUp, async (req, res, next)
         // Get current date/time in Brazil timezone
         const data = new Date();
         const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
-        const userExist = await index_1.default.findOne({ 'info.email': email });
-        if (userExist) {
-            return res.status(422).json({ error: 'E-mail já cadastrado!' });
-        }
-        const user = {
+        const User = {
             info: {
                 firstName,
                 surname,
@@ -40,7 +36,8 @@ router.post('/auth/user/sign-up', index_2.validateSignUp, async (req, res, next)
             }
         };
         // Insert user in database
-        await index_1.default.create(user);
+        await index_1.default.create(User);
+        const user = await index_1.default.findOne({ 'info.email': email });
         // console.log('User created:', user); // Log the created user
         res.status(201).json({
             message: 'Usuário cadastrado com sucesso!',
@@ -53,23 +50,14 @@ router.post('/auth/user/sign-up', index_2.validateSignUp, async (req, res, next)
     }
 });
 //Login users
-router.post('/auth/user/sign-in', async (req, res) => {
+router.post('/auth/user/sign-in', index_2.validateSignIn, async (req, res) => {
     const { info, security } = req.body;
     const { email } = info;
     const { password } = security;
-    if (!email) {
-        return res.status(422).json({ message: 'O e-mail é obrigatório!' });
-    }
     try {
-        // Check if user exists
         const user = await index_1.default.findOne({ 'info.email': email });
         if (!user) {
-            return res.status(404).json({ message: 'Usuário não cadastrado!' });
-        }
-        // Check if password matches
-        const checkPassword = await bcrypt_1.default.compare(password, user.security.password);
-        if (!checkPassword) {
-            return res.status(422).json({ message: 'Senha inválida!' });
+            return res.status(404).json({ error: 'Usuário não cadastrado!' });
         }
         // Fetch group information based on groupIds
         const groups = await group_1.default.find({ _id: { $in: user.groupIds } });
@@ -86,7 +74,7 @@ router.post('/auth/user/sign-in', async (req, res) => {
     }
     catch (error) {
         console.log(error);
-        res.status(500).json({ message: 'Aconteceu um erro no servidor, tente novamente mais tarde!' });
+        res.status(500).json({ error: 'Aconteceu um erro no servidor, tente novamente mais tarde!' });
     }
 });
 // Update - User
