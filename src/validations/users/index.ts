@@ -4,17 +4,17 @@ import Users, { IUsers } from '../../models/users/index';
 
 const signUpSchema = Joi.object({
     info: Joi.object({
-        firstName: Joi.string().required().messages({ 'any.required': 'O nome é obrigatório' }),
-        surname: Joi.string().required().messages({ 'any.required': 'O sobrenome é obrigatório' }),
-        email: Joi.string().email().required().messages({ 'any.required': 'O email é obrigatório' }),
+        firstName: Joi.string().required().error(new Error('O nome é obrigatório')),
+        surname: Joi.string().required().error(new Error('O sobrenome é obrigatório')),
+        email: Joi.string().email().required().error(new Error('O email é obrigatório')),
     }),
     security: Joi.object({
         authWith: Joi.string().valid('google', 'facebook', 'manually').required(),
-        password: Joi.string().required().messages({ 'any.required': 'A senha é obrigatória' }),
+        password: Joi.string().required().error(new Error('A senha é obrigatória')),
         confirmPassword: Joi.string()
             .valid(Joi.ref('password'))
             .required()
-            .messages({ 'any.required': 'As senhas não conferem' }),
+            .error(new Error('As senhas não conferem')),
     }),
 }).options({ abortEarly: false });
 
@@ -24,8 +24,8 @@ const validateSignUp = async (req: Request, res: Response, next: NextFunction) =
         console.log(req.body);
         // Verificar se o e-mail já está cadastrado
         const { email } = req.body;
-        const emailExists = await Users.findOne({ 'info.email': email });
-        if (emailExists) {
+        const userExist = await Users.findOne({ 'info.email': email })
+        if (userExist) {
             return res.status(422).json({ error: 'E-mail já cadastrado!' });
         }
         next();

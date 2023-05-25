@@ -23,10 +23,6 @@ router.post('/auth/user/sign-up', index_2.validateSignUp, async (req, res, next)
         // Get current date/time in Brazil timezone
         const data = new Date();
         const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
-        const userExist = await index_1.default.findOne({ 'info.email': email });
-        if (userExist) {
-            return res.status(422).json({ error: 'E-mail já cadastrado!' });
-        }
         const user = {
             info: {
                 firstName,
