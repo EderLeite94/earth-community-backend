@@ -3,7 +3,7 @@ import Users, { IUsers } from '../../models/users/index';
 import bcrypt from 'bcrypt';
 import moment from 'moment';
 import jwt from 'jsonwebtoken';
-import { validateSignUp } from '../../validations/users/index';
+import { validateSignUp, validateSignIn } from '../../validations/users/index';
 import Group from '../../models/group';
 const router = express.Router();
 //register
@@ -20,8 +20,8 @@ router.post('/auth/user/sign-up', validateSignUp, async (req: Request, res: Resp
     // Get current date/time in Brazil timezone
     const data = new Date();
     const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
-    
-    const user = {
+
+    const User = {
       info: {
         firstName,
         surname,
@@ -34,7 +34,8 @@ router.post('/auth/user/sign-up', validateSignUp, async (req: Request, res: Resp
       }
     };
     // Insert user in database
-    await Users.create(user);
+    await Users.create(User);
+    const user = await Users.findOne({ 'info.email': email });
     // console.log('User created:', user); // Log the created user
     res.status(201).json({
       message: 'Usuário cadastrado com sucesso!',
@@ -47,32 +48,20 @@ router.post('/auth/user/sign-up', validateSignUp, async (req: Request, res: Resp
 });
 
 //Login users
-router.post('/auth/user/sign-in', async (req: Request, res: Response) => {
+router.post('/auth/user/sign-in', validateSignIn, async (req: Request, res: Response) => {
   const { info, security } = req.body;
   const { email } = info;
   const { password } = security;
-
-  if (!email) {
-    return res.status(422).json({ message: 'O e-mail é obrigatório!' });
-  }
-
   try {
-    // Check if user exists
     const user: IUsers | null = await Users.findOne({ 'info.email': email });
     if (!user) {
-      return res.status(404).json({ message: 'Usuário não cadastrado!' });
+      return res.status(404).json({ error: 'Usuário não cadastrado!' });
     }
-
-    // Check if password matches
-    const checkPassword: boolean = await bcrypt.compare(password, user.security.password);
-    if (!checkPassword) {
-      return res.status(422).json({ message: 'Senha inválida!' });
-    }
-
     // Fetch group information based on groupIds
     const groups = await Group.find({ _id: { $in: user.groupIds } });
 
     const secret: string | undefined = process.env.SECRET;
+
     const token: string = jwt.sign(
       {
         id: user.info._id,
@@ -88,7 +77,7 @@ router.post('/auth/user/sign-in', async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: 'Aconteceu um erro no servidor, tente novamente mais tarde!' });
+    res.status(500).json({ error: 'Aconteceu um erro no servidor, tente novamente mais tarde!' });
   }
 });
 // Update - User

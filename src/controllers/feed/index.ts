@@ -110,9 +110,8 @@ router.post('/post/like/:id/:userId', async (req: Request, res: Response) => {
     const { id, userId } = req.params;
     try {
         const post = await Post.findById(id);
-
         if (!post) {
-            return res.status(404).json({ message: 'Postagem não encontrada' });
+            return res.status(404).json({ error: 'Postagem não encontrada' });
         }
 
         const userLiked = post.likes.userIds.includes(userId);
@@ -134,7 +133,7 @@ router.post('/post/like/:id/:userId', async (req: Request, res: Response) => {
         }
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: 'Erro interno do servidor' });
+        res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
 //Comment
@@ -146,7 +145,7 @@ router.post('/post/comment/:id/:userId', async (req: Request, res: Response) => 
         if (!post) {
             return res.status(404).send({ error: 'Post não encontrado' });
         }
-        const user = await Users.findOne({ userId })
+        const user = await Users.findById({ _id: userId })
         if (!user) {
             return res.status(404).send({ error: 'Usuário não encontrado' });
         }
