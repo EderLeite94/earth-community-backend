@@ -82,7 +82,7 @@ router.patch('/user/update-by-id/:id', async (req, res) => {
     moment_1.default.locale('pt-BR');
     const id = req.params.id;
     const { info, address } = req.body;
-    const { firstName, surname, email, dateOfBirth, pictureProfile, phone } = info;
+    const { nickName, firstName, surname, email, dateOfBirth, pictureProfile, phone } = info;
     const isoDate = (0, moment_1.default)(dateOfBirth, 'DD/MM/YYYY', true).toDate();
     info.dateOfBirth = isoDate;
     const { city, state } = address;
@@ -94,6 +94,22 @@ router.patch('/user/update-by-id/:id', async (req, res) => {
         res.status(200).json({ message: 'Dados atualizados com sucesso!' });
     }
     catch (error) {
+        res.status(500).json({ error: error });
+    }
+});
+router.get('/user/get-by-nickname/:nickName', async (req, res) => {
+    const { nickName } = req.params;
+    try {
+        const user = await index_1.default.findOne({ 'info.nickName': nickName });
+        if (!user) {
+            return res.status(404).json({ error: 'Nick name não encontrado' });
+        }
+        res.status(200).json({
+            user
+        });
+    }
+    catch (error) {
+        console.error('Error adding member:', error);
         res.status(500).json({ error: error });
     }
 });

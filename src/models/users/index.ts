@@ -3,6 +3,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface IUsers {
     info: {
         _id: any;
+        nickName: string;
         firstName: string;
         surname: string;
         email: string;
@@ -27,6 +28,7 @@ export type UsersDocument = IUsers & Document;
 
 const UsersSchema: Schema = new Schema({
     info: {
+        nickName: { type: String, unique: true },
         firstName: { type: String, required: true },
         surname: { type: String, required: true },
         email: { type: String, required: true, unique: true },
