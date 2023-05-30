@@ -91,7 +91,11 @@ router.patch('/user/update-by-id/:id', async (req, res) => {
         if (updateUser.matchedCount === 0) {
             res.status(422).json({ message: 'Usuário não encontrado' });
         }
-        res.status(200).json({ message: 'Dados atualizados com sucesso!' });
+        const user = await index_1.default.findById({ _id: id }, req.body);
+        res.status(200).json({
+            message: 'Dados atualizados com sucesso!',
+            user
+        });
     }
     catch (error) {
         res.status(500).json({ error: error });
