@@ -102,7 +102,7 @@ router.get('/user/get-by-nickname/:nickName', async (req, res) => {
     try {
         const user = await index_1.default.findOne({ 'info.nickName': nickName });
         if (!user) {
-            return res.status(404).json({ error: 'Nick name não encontrado' });
+            return res.status(404).json({ error: 'Nick não encontrado' });
         }
         res.status(200).json({
             user

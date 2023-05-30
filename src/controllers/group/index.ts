@@ -98,14 +98,13 @@ router.get('/group/get-by-id/:id', async (req: Request, res: Response) => {
 });
 router.post('/group/add-member/:id/:userId', async (req: Request, res: Response) => {
   const { id, userId } = req.params;
-
   try {
     const group = await Group.findById(id);
     if (!group) {
       return res.status(404).json({ message: 'Grupo não encontrado' });
     }
     // Verifica se o userId já está presente no array memberIds
-    const userExists = await Users.findOne({ groupIds: id });
+    const userExists = group.memberIds.find(member => member.userId === userId);
     if (userExists) {
       return res.status(400).json({ message: 'Usuário já é membro deste grupo' });
     }
