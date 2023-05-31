@@ -10,6 +10,7 @@ const moment_1 = __importDefault(require("moment"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const index_2 = require("../../validations/users/index");
 const group_1 = __importDefault(require("../../models/group"));
+const index_3 = require("../users/nickname/index");
 const router = express_1.default.Router();
 //register
 router.post('/auth/user/sign-up', index_2.validateSignUp, async (req, res, next) => {
@@ -20,14 +21,16 @@ router.post('/auth/user/sign-up', index_2.validateSignUp, async (req, res, next)
         // Create password hash
         const salt = await bcrypt_1.default.genSalt(12);
         const passwordHash = await bcrypt_1.default.hash(password, salt);
+        // Generate a unique nickname
+        const nickname = await (0, index_3.generateUniqueNickname)(firstName, surname);
         // Get current date/time in Brazil timezone
-        const data = new Date();
-        const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
-        const User = {
+        const now = new Date(new Date().getTime() - (3 * 60 * 60 * 1000));
+        const user = {
             info: {
                 firstName,
                 surname,
-                email
+                email,
+                nickName: nickname,
             },
             security: {
                 authWith,
@@ -36,16 +39,14 @@ router.post('/auth/user/sign-up', index_2.validateSignUp, async (req, res, next)
             }
         };
         // Insert user in database
-        await index_1.default.create(User);
-        const user = await index_1.default.findOne({ 'info.email': email });
-        // console.log('User created:', user); // Log the created user
+        await index_1.default.create(user);
         res.status(201).json({
             message: 'Usuário cadastrado com sucesso!',
-            user,
+            user: user.info
         });
     }
     catch (error) {
-        // console.error('Error creating user:', error);
+        console.error('Error creating user:', error);
         return res.status(500).json({ error: 'Erro ao criar usuário' });
     }
 });
@@ -89,7 +90,7 @@ router.patch('/user/update-by-id/:id', async (req, res) => {
     try {
         const updateUser = await index_1.default.updateOne({ _id: id }, req.body);
         if (updateUser.matchedCount === 0) {
-            res.status(422).json({ message: 'Usuário não encontrado' });
+            res.status(422).json({ error: 'Usuário não encontrado' });
         }
         const user = await index_1.default.findById({ _id: id }, req.body);
         res.status(200).json({

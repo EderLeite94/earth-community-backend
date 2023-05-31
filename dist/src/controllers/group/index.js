@@ -29,10 +29,10 @@ router.post('/group/create/:id', async (req, res) => {
         createdAt: now
     };
     if (!name) {
-        return res.status(422).json({ message: 'Preencha um nome!' });
+        return res.status(422).json({ error: 'Preencha um nome!' });
     }
     if (!category) {
-        return res.status(422).json({ message: 'Escolha uma categoria!' });
+        return res.status(422).json({ error: 'Escolha uma categoria!' });
     }
     try {
         const newGroup = await index_1.default.create(group);
@@ -49,14 +49,14 @@ router.post('/group/create/:id', async (req, res) => {
 });
 // Delete group
 router.delete('/group/delete/:id/:userId', async (req, res) => {
-    const { id, userId } = req.params;
     try {
+        const { id, userId } = req.params;
         const group = await index_1.default.findById(id);
         if (!group) {
-            return res.status(404).json({ message: 'Grupo não encontrado' });
+            return res.status(404).json({ error: 'Grupo não encontrado' });
         }
         // if (group.createdByUser !== userId) {
-        //   return res.status(401).json({ message: 'Você não tem permissão para excluir este grupo' });
+        //   return res.status(401).json({ error: 'Você não tem permissão para excluir este grupo' });
         // }
         await index_1.default.findByIdAndDelete(id);
         await index_2.default.updateMany({ $pull: { groupIds: id } });
@@ -99,12 +99,12 @@ router.post('/group/add-member/:id/:userId', async (req, res) => {
     try {
         const group = await index_1.default.findById(id);
         if (!group) {
-            return res.status(404).json({ message: 'Grupo não encontrado' });
+            return res.status(404).json({ error: 'Grupo não encontrado' });
         }
         // Verifica se o userId já está presente no array memberIds
         const userExists = group.memberIds.find(member => member.userId === userId);
         if (userExists) {
-            return res.status(400).json({ message: 'Usuário já é membro deste grupo' });
+            return res.status(400).json({ error: 'Usuário já é membro deste grupo' });
         }
         await index_1.default.findByIdAndUpdate(id, { $addToSet: { memberIds: { userId } } });
         await index_2.default.findByIdAndUpdate(userId, { $addToSet: { groupIds: id } });

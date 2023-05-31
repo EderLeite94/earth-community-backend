@@ -5,6 +5,7 @@ import moment from 'moment';
 import jwt from 'jsonwebtoken';
 import { validateSignUp, validateSignIn } from '../../validations/users/index';
 import Group from '../../models/group';
+import { generateUniqueNickname } from '../users/nickname/index';
 const router = express.Router();
 //register
 router.post('/auth/user/sign-up', validateSignUp, async (req: Request, res: Response, next: NextFunction) => {
@@ -16,16 +17,19 @@ router.post('/auth/user/sign-up', validateSignUp, async (req: Request, res: Resp
     // Create password hash
     const salt = await bcrypt.genSalt(12);
     const passwordHash = await bcrypt.hash(password, salt);
+    
+    // Generate a unique nickname
+    const nickname = await generateUniqueNickname(firstName, surname);
 
     // Get current date/time in Brazil timezone
-    const data = new Date();
-    const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
+    const now = new Date(new Date().getTime() - (3 * 60 * 60 * 1000));
 
-    const User = {
+    const user = {
       info: {
         firstName,
         surname,
-        email
+        email,
+        nickName: nickname,
       },
       security: {
         authWith,
@@ -33,20 +37,19 @@ router.post('/auth/user/sign-up', validateSignUp, async (req: Request, res: Resp
         accountCreateDate: now
       }
     };
+
     // Insert user in database
-    await Users.create(User);
-    const user = await Users.findOne({ 'info.email': email });
-    // console.log('User created:', user); // Log the created user
+    await Users.create(user);
+
     res.status(201).json({
       message: 'Usuário cadastrado com sucesso!',
-      user,
+      user: user.info
     });
   } catch (error) {
-    // console.error('Error creating user:', error);
+    console.error('Error creating user:', error);
     return res.status(500).json({ error: 'Erro ao criar usuário' });
   }
 });
-
 //Login users
 router.post('/auth/user/sign-in', validateSignIn, async (req: Request, res: Response) => {
   const { info, security } = req.body;
@@ -92,7 +95,7 @@ router.patch('/user/update-by-id/:id', async (req: Request, res: Response) => {
   try {
     const updateUser = await Users.updateOne({ _id: id }, req.body);
     if (updateUser.matchedCount === 0) {
-      res.status(422).json({ message: 'Usuário não encontrado' })
+      res.status(422).json({ error: 'Usuário não encontrado' })
     }
     const user = await Users.findById({ _id: id }, req.body);
     res.status(200).json({

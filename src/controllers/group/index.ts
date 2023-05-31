@@ -28,10 +28,10 @@ router.post('/group/create/:id', async (req: Request, res: Response) => {
   }
 
   if (!name) {
-    return res.status(422).json({ message: 'Preencha um nome!' });
+    return res.status(422).json({ error: 'Preencha um nome!' });
   }
   if (!category) {
-    return res.status(422).json({ message: 'Escolha uma categoria!' });
+    return res.status(422).json({ error: 'Escolha uma categoria!' });
   }
   try {
     const newGroup = await Group.create(group);
@@ -49,17 +49,16 @@ router.post('/group/create/:id', async (req: Request, res: Response) => {
 });
 // Delete group
 router.delete('/group/delete/:id/:userId', async (req: Request, res: Response) => {
-  const { id, userId } = req.params;
-
   try {
+    const { id, userId } = req.params;
     const group = await Group.findById(id);
 
     if (!group) {
-      return res.status(404).json({ message: 'Grupo não encontrado' });
+      return res.status(404).json({ error: 'Grupo não encontrado' });
     }
 
     // if (group.createdByUser !== userId) {
-    //   return res.status(401).json({ message: 'Você não tem permissão para excluir este grupo' });
+    //   return res.status(401).json({ error: 'Você não tem permissão para excluir este grupo' });
     // }
 
     await Group.findByIdAndDelete(id);
@@ -101,12 +100,12 @@ router.post('/group/add-member/:id/:userId', async (req: Request, res: Response)
   try {
     const group = await Group.findById(id);
     if (!group) {
-      return res.status(404).json({ message: 'Grupo não encontrado' });
+      return res.status(404).json({ error: 'Grupo não encontrado' });
     }
     // Verifica se o userId já está presente no array memberIds
     const userExists = group.memberIds.find(member => member.userId === userId);
     if (userExists) {
-      return res.status(400).json({ message: 'Usuário já é membro deste grupo' });
+      return res.status(400).json({ error: 'Usuário já é membro deste grupo' });
     }
 
     await Group.findByIdAndUpdate(id, { $addToSet: { memberIds: { userId } } });

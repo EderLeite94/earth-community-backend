@@ -23,11 +23,11 @@ router.post('/post/create/:id', async (req, res) => {
         createdAt: now
     };
     if (!text) {
-        return res.status(400).send('Insira um texto!');
+        return res.status(400).send({ error: 'Insira um texto!' });
     }
     const UserId = await index_2.default.findOne({ _id: id }, req.body);
     if (!UserId) {
-        return res.status(400).send('Usuário inválido!');
+        return res.status(400).send({ error: 'Usuário inválido!' });
     }
     try {
         await index_1.default.create(post);
@@ -47,14 +47,14 @@ router.delete('/post/delete/:id', async (req, res) => {
     try {
         const post = await index_1.default.findById(id);
         if (!post) {
-            return res.status(404).send('Post não encontrado');
+            return res.status(404).send({ error: 'Post não encontrado' });
         }
         await post.deleteOne();
-        res.status(200).send('Post removido com sucesso');
+        res.status(200).send({ message: 'Post removido com sucesso' });
     }
     catch (err) {
         console.error(err);
-        res.status(500).send('Erro ao remover post');
+        res.status(500).send({ error: 'Erro ao remover post' });
     }
 });
 // Get all post
@@ -88,7 +88,7 @@ router.get('/post/get-by-id/:id', async (req, res) => {
     try {
         const post = await index_1.default.findOne({ _id: id });
         if (!post) {
-            res.status(422).json({ message: 'Post não encontrado!' });
+            res.status(422).json({ error: 'Post não encontrado!' });
             return;
         }
         res.status(200).json(post);
@@ -162,19 +162,19 @@ router.delete('/post/delete-comment/:id/:id_comments', async (req, res) => {
     try {
         const post = await index_1.default.findById(id);
         if (!post) {
-            return res.status(404).send('Post não encontrado');
+            return res.status(404).send({ error: 'Post não encontrado' });
         }
         const commentIndex = post.comments.findIndex((comment) => String(comment._id) === id_comments);
         if (commentIndex === -1) {
-            return res.status(404).send('Comentário não encontrado');
+            return res.status(404).send({ error: 'Comentário não encontrado' });
         }
         post.comments.splice(commentIndex, 1);
         await post.updateOne({ comments: post.comments });
-        res.status(200).send('Comentário removido com sucesso');
+        res.status(200).send({ error: 'Comentário removido com sucesso' });
     }
     catch (err) {
         console.error(err);
-        res.status(500).send('Erro ao remover comentário');
+        res.status(500).send({ error: 'Erro ao remover comentário' });
     }
 });
 exports.default = router;
