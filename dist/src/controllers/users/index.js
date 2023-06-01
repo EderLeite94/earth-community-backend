@@ -25,7 +25,7 @@ router.post('/auth/user/sign-up', index_2.validateSignUp, async (req, res, next)
         const nickname = await (0, index_3.generateUniqueNickname)(firstName, surname);
         // Get current date/time in Brazil timezone
         const now = new Date(new Date().getTime() - (3 * 60 * 60 * 1000));
-        const user = {
+        const users = {
             info: {
                 firstName,
                 surname,
@@ -39,7 +39,8 @@ router.post('/auth/user/sign-up', index_2.validateSignUp, async (req, res, next)
             }
         };
         // Insert user in database
-        await index_1.default.create(user);
+        await index_1.default.create(users);
+        const user = await index_1.default.findOne({ 'info.email': email });
         res.status(201).json({
             message: 'Usuário cadastrado com sucesso!',
             user

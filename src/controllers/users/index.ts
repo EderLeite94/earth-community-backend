@@ -24,7 +24,7 @@ router.post('/auth/user/sign-up', validateSignUp, async (req: Request, res: Resp
     // Get current date/time in Brazil timezone
     const now = new Date(new Date().getTime() - (3 * 60 * 60 * 1000));
 
-    const user = {
+    const users = {
       info: {
         firstName,
         surname,
@@ -39,8 +39,8 @@ router.post('/auth/user/sign-up', validateSignUp, async (req: Request, res: Resp
     };
 
     // Insert user in database
-    await Users.create(user);
-
+    await Users.create(users);
+    const user: IUsers | null = await Users.findOne({ 'info.email': email });
     res.status(201).json({
       message: 'Usuário cadastrado com sucesso!',
       user
