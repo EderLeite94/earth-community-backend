@@ -43,7 +43,7 @@ router.post('/auth/user/sign-up', validateSignUp, async (req: Request, res: Resp
 
     res.status(201).json({
       message: 'Usuário cadastrado com sucesso!',
-      user: user.info
+      user
     });
   } catch (error) {
     console.error('Error creating user:', error);
@@ -71,7 +71,7 @@ router.post('/auth/user/sign-in', validateSignIn, async (req: Request, res: Resp
       },
       secret || ''
     );
-
+    
     res.status(200).json({
       message: 'Usuário logado com sucesso',
       token,

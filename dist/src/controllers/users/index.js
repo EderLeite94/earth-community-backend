@@ -42,7 +42,7 @@ router.post('/auth/user/sign-up', index_2.validateSignUp, async (req, res, next)
         await index_1.default.create(user);
         res.status(201).json({
             message: 'Usuário cadastrado com sucesso!',
-            user: user.info
+            user
         });
     }
     catch (error) {
