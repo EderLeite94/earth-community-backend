@@ -85,8 +85,8 @@ router.patch('/user/update-by-id/:id', async (req, res) => {
     const id = req.params.id;
     const { info, address } = req.body;
     const { nickName, firstName, surname, email, dateOfBirth, pictureProfile, phone } = info;
-    const isoDate = (0, moment_1.default)(dateOfBirth, 'DD/MM/YYYY', true).toDate();
-    info.dateOfBirth = isoDate;
+    // const isoDate = moment(dateOfBirth, 'DD/MM/YYYY', true).toDate();
+    // info.dateOfBirth = isoDate;
     const { city, state } = address;
     try {
         const updateUser = await index_1.default.updateOne({ _id: id }, req.body);
