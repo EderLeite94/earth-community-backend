@@ -16,15 +16,16 @@ router.post('/group/create/:id', async (req, res) => {
     const data = new Date();
     const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
     const user = await index_2.default.findById(id);
+    if (!user) {
+        return res.status(422).json({ error: 'Usuário não encontrado!' });
+    }
     const group = {
         name,
         image,
         description,
         category,
         headOffice,
-        memberIds: {
-            userId: id,
-        },
+        members: user,
         createdByUser: user,
         createdAt: now
     };
@@ -99,14 +100,18 @@ router.post('/group/add-member/:id/:userId', async (req, res) => {
     try {
         const group = await index_1.default.findById(id);
         if (!group) {
-            return res.status(404).json({ error: 'Grupo não encontrado' });
+            return res.status(404).json({ error: 'Group not found' });
         }
-        // Verifica se o userId já está presente no array memberIds
-        const userExists = group.memberIds.find(member => member.userId === userId);
+        // Check if userId already exists in the members array
+        const userExists = group.members.find(member => member.user.info._id.toString() === userId);
         if (userExists) {
             return res.status(400).json({ error: 'Usuário já é membro deste grupo' });
         }
-        await index_1.default.findByIdAndUpdate(id, { $addToSet: { memberIds: { userId } } });
+        const user = await index_2.default.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'Usuário não encontrado!' });
+        }
+        await index_1.default.findByIdAndUpdate(id, { $addToSet: { members: { user } } });
         await index_2.default.findByIdAndUpdate(userId, { $addToSet: { groupIds: id } });
         res.status(200).json({ message: 'Usuário adicionado com sucesso' });
     }

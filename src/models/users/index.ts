@@ -7,6 +7,7 @@ export interface IUsers {
         firstName: string;
         surname: string;
         email: string;
+        about: string;
         dateOfBirth: Date;
         pictureProfile: string;
         phone: string;
@@ -32,6 +33,7 @@ const UsersSchema: Schema = new Schema({
         firstName: { type: String, required: true },
         surname: { type: String, required: true },
         email: { type: String, required: true, unique: true },
+        about: { type: String },
         dateOfBirth: { type: Date },
         pictureProfile: { type: String },
         phone: { type: String },

@@ -9,8 +9,26 @@ export interface IGroup {
         city: string;
         state: string;
     }
-    memberIds: Array<{
-        userId: string;
+    members: Array<{
+        user: {
+            info: {
+                _id: any;
+                firstName: string;
+                surname: string;
+                email: string;
+                dateOfBirth: Date;
+                phone: string;
+            };
+            security: {
+                authWith: 'google' | 'facebook' | 'manually';
+                password: string;
+                accountCreateDate: Date;
+            };
+            address: {
+                city: string;
+                state: string;
+            };
+        }
     }>
     createdByUser: {
         info: {

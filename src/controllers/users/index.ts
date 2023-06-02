@@ -17,7 +17,7 @@ router.post('/auth/user/sign-up', validateSignUp, async (req: Request, res: Resp
     // Create password hash
     const salt = await bcrypt.genSalt(12);
     const passwordHash = await bcrypt.hash(password, salt);
-    
+
     // Generate a unique nickname
     const nickname = await generateUniqueNickname(firstName, surname);
 
@@ -71,7 +71,7 @@ router.post('/auth/user/sign-in', validateSignIn, async (req: Request, res: Resp
       },
       secret || ''
     );
-    
+
     res.status(200).json({
       message: 'Usuário logado com sucesso',
       token,
@@ -88,7 +88,7 @@ router.patch('/user/update-by-id/:id', async (req: Request, res: Response) => {
   moment.locale('pt-BR');
   const id: string = req.params.id;
   const { info, address } = req.body;
-  const { nickName, firstName, surname, email, dateOfBirth, pictureProfile, phone } = info;
+  const { nickName, firstName, surname, email, about, dateOfBirth, pictureProfile, phone } = info;
   const { city, state } = address
   try {
     const updateUser = await Users.updateOne({ _id: id }, req.body);

@@ -84,9 +84,7 @@ router.patch('/user/update-by-id/:id', async (req, res) => {
     moment_1.default.locale('pt-BR');
     const id = req.params.id;
     const { info, address } = req.body;
-    const { nickName, firstName, surname, email, dateOfBirth, pictureProfile, phone } = info;
-    // const isoDate = moment(dateOfBirth, 'DD/MM/YYYY', true).toDate();
-    // info.dateOfBirth = isoDate;
+    const { nickName, firstName, surname, email, about, dateOfBirth, pictureProfile, phone } = info;
     const { city, state } = address;
     try {
         const updateUser = await index_1.default.updateOne({ _id: id }, req.body);
