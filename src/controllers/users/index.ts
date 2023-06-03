@@ -6,6 +6,8 @@ import jwt from 'jsonwebtoken';
 import { validateSignUp, validateSignIn } from '../../validations/users/index';
 import Group from '../../models/group';
 import { generateUniqueNickname } from '../users/nickname/index';
+import Post from '../../models/feed';
+import mongoose from 'mongoose';
 const router = express.Router();
 //register
 router.post('/auth/user/sign-up', validateSignUp, async (req: Request, res: Response, next: NextFunction) => {
@@ -85,23 +87,45 @@ router.post('/auth/user/sign-in', validateSignIn, async (req: Request, res: Resp
 });
 // Update - User
 router.patch('/user/update-by-id/:id', async (req: Request, res: Response) => {
-  moment.locale('pt-BR');
   const id: string = req.params.id;
   const { info, address } = req.body;
   const { nickName, firstName, surname, email, about, dateOfBirth, pictureProfile, phone } = info;
-  const { city, state } = address
+  const { city, state } = address;
+
   try {
     const updateUser = await Users.updateOne({ _id: id }, req.body);
-    if (updateUser.matchedCount === 0) {
-      res.status(422).json({ error: 'Usuário não encontrado' })
+
+    const user = await Users.findById(id);
+    if (!user) {
+      return res.status(422).json({ error: 'Usuário não encontrado' });
     }
-    const user = await Users.findById({ _id: id }, req.body);
-    res.status(200).json({
+
+    const updatedPosts = await Post.updateMany(
+      { 'comments.user._id': new mongoose.Types.ObjectId(id) },
+      {
+        $set: {
+          'comments.$[elem].user.info.nickName': nickName,
+          'comments.$[elem].user.info.firstName': firstName,
+          'comments.$[elem].user.info.surname': surname,
+          'comments.$[elem].user.info.email': email,
+          'comments.$[elem].user.info.about': about,
+          'comments.$[elem].user.info.dateOfBirth': dateOfBirth,
+          'comments.$[elem].user.info.pictureProfile': pictureProfile,
+          'comments.$[elem].user.info.phone': phone,
+          'comments.$[elem].user.address.city': city,
+          'comments.$[elem].user.address.state': state,
+        }
+      },
+      { arrayFilters: [{ 'elem.user._id': new mongoose.Types.ObjectId(id) }] }
+    );
+
+    return res.status(200).json({
       message: 'Dados atualizados com sucesso!',
-      user
-    })
+      user,
+      updatedPosts
+    });
   } catch (error) {
-    res.status(500).json({ error: error });
+    return res.status(500).json({ error: error });
   }
 });
 router.get('/user/get-by-nickname/:nickName', async (req: Request, res: Response) => {

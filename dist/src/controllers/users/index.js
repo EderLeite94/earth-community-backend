@@ -6,11 +6,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const index_1 = __importDefault(require("../../models/users/index"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
-const moment_1 = __importDefault(require("moment"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const index_2 = require("../../validations/users/index");
 const group_1 = __importDefault(require("../../models/group"));
 const index_3 = require("../users/nickname/index");
+const feed_1 = __importDefault(require("../../models/feed"));
+const mongoose_1 = __importDefault(require("mongoose"));
 const router = express_1.default.Router();
 //register
 router.post('/auth/user/sign-up', index_2.validateSignUp, async (req, res, next) => {
@@ -81,24 +82,38 @@ router.post('/auth/user/sign-in', index_2.validateSignIn, async (req, res) => {
 });
 // Update - User
 router.patch('/user/update-by-id/:id', async (req, res) => {
-    moment_1.default.locale('pt-BR');
     const id = req.params.id;
     const { info, address } = req.body;
     const { nickName, firstName, surname, email, about, dateOfBirth, pictureProfile, phone } = info;
     const { city, state } = address;
     try {
         const updateUser = await index_1.default.updateOne({ _id: id }, req.body);
-        if (updateUser.matchedCount === 0) {
-            res.status(422).json({ error: 'Usuário não encontrado' });
+        const user = await index_1.default.findById(id);
+        if (!user) {
+            return res.status(422).json({ error: 'Usuário não encontrado' });
         }
-        const user = await index_1.default.findById({ _id: id }, req.body);
-        res.status(200).json({
+        const updatedPosts = await feed_1.default.updateMany({ 'comments.user._id': new mongoose_1.default.Types.ObjectId(id) }, {
+            $set: {
+                'comments.$[elem].user.info.nickName': nickName,
+                'comments.$[elem].user.info.firstName': firstName,
+                'comments.$[elem].user.info.surname': surname,
+                'comments.$[elem].user.info.email': email,
+                'comments.$[elem].user.info.about': about,
+                'comments.$[elem].user.info.dateOfBirth': dateOfBirth,
+                'comments.$[elem].user.info.pictureProfile': pictureProfile,
+                'comments.$[elem].user.info.phone': phone,
+                'comments.$[elem].user.address.city': city,
+                'comments.$[elem].user.address.state': state,
+            }
+        }, { arrayFilters: [{ 'elem.user._id': new mongoose_1.default.Types.ObjectId(id) }] });
+        return res.status(200).json({
             message: 'Dados atualizados com sucesso!',
-            user
+            user,
+            updatedPosts
         });
     }
     catch (error) {
-        res.status(500).json({ error: error });
+        return res.status(500).json({ error: error });
     }
 });
 router.get('/user/get-by-nickname/:nickName', async (req, res) => {
