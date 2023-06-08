@@ -7,20 +7,27 @@ const express_1 = __importDefault(require("express"));
 const index_1 = __importDefault(require("../../models/feed/index"));
 const index_2 = __importDefault(require("../../models/users/index"));
 const mongoose_1 = __importDefault(require("mongoose"));
+const group_1 = __importDefault(require("../../models/group"));
 const router = express_1.default.Router();
 // Create post
-router.post('/post/create/:id', async (req, res) => {
+router.post('/post/create/:id/:groupID', async (req, res) => {
     const id = req.params.id;
+    const groupID = req.params.groupID;
     const { text, image } = req.body;
     // Date Brazil
     const data = new Date();
     const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
     const user = await index_2.default.findOne({ _id: id });
+    const group = await group_1.default.findById(groupID);
+    if (!group) {
+        return res.status(400).send({ error: 'Grupo não encontrado!' });
+    }
     const post = {
         text,
         image,
         createdByUser: user,
-        createdAt: now
+        createdAt: now,
+        createdByGroupId: groupID
     };
     if (!text) {
         return res.status(400).send({ error: 'Insira um texto!' });
@@ -87,6 +94,21 @@ router.get('/post/get-by-id/:id', async (req, res) => {
     const id = req.params.id;
     try {
         const post = await index_1.default.findOne({ _id: id });
+        if (!post) {
+            res.status(422).json({ error: 'Post não encontrado!' });
+            return;
+        }
+        res.status(200).json(post);
+    }
+    catch (error) {
+        res.status(500).json({ error: error });
+    }
+});
+// Get - Post createdByGroupId
+router.get('/post/get-by-group-id/:id', async (req, res) => {
+    const id = req.params.id;
+    try {
+        const post = await index_1.default.find({ createdByGroupId: id });
         if (!post) {
             res.status(422).json({ error: 'Post não encontrado!' });
             return;
