@@ -8,9 +8,10 @@ export interface IGroup {
     headOffice: {
         city: string;
         state: string;
-    }
+    },
     members: Array<{
         user: {
+            _id: any;
             info: {
                 _id: any;
                 firstName: string;
@@ -29,28 +30,31 @@ export interface IGroup {
                 state: string;
             };
         }
-    }>
-    createdByUser: {
-        info: {
+    }>,
+    createdByUser: Array<{
+        user: {
             _id: any;
-            firstName: string;
-            surname: string;
-            email: string;
-            dateOfBirth: Date;
-            phone: string;
-        };
-        security: {
-            authWith: 'google' | 'facebook' | 'manually';
-            password: string;
-            accountCreateDate: Date;
-        };
-        address: {
-            city: string;
-            state: string;
-        };
+            info: {
+                _id: any;
+                firstName: string;
+                surname: string;
+                email: string;
+                dateOfBirth: Date;
+                phone: string;
+            };
+            security: {
+                authWith: 'google' | 'facebook' | 'manually';
+                password: string;
+                accountCreateDate: Date;
+            };
+            address: {
+                city: string;
+                state: string;
+            };
+        }
         groupIds: string[];
         donationIds: number[];
-    };
+    }>,
     createdAt: Date;
 }
 
@@ -65,14 +69,11 @@ const GroupSchema: Schema = new Schema({
         city: { type: String },
         state: { type: String },
     },
-    memberIds: Array<{
-        userId: { type: String },
-    }>,
-    createdByUser: {
+    members: Array<{
         info: {
-            firstName: { type: String},
-            surname: { type: String},
-            email: { type: String},
+            firstName: { type: String },
+            surname: { type: String },
+            email: { type: String },
             dateOfBirth: { type: Date },
             phone: { type: String },
         },
@@ -87,7 +88,27 @@ const GroupSchema: Schema = new Schema({
         },
         groupIds: [{ type: String }],
         donationIds: [{ type: Number }],
-    },
+    }>,
+    createdByUser: Array<{
+        info: {
+            firstName: { type: String },
+            surname: { type: String },
+            email: { type: String },
+            dateOfBirth: { type: Date },
+            phone: { type: String },
+        },
+        security: {
+            authWith: { type: String, enum: ['google', 'facebook', 'manually'] },
+            password: { type: String },
+            accountCreateDate: { type: Date },
+        },
+        address: {
+            city: { type: String },
+            state: { type: String },
+        },
+        groupIds: [{ type: String }],
+        donationIds: [{ type: Number }],
+    }>,
     createdAt: { type: Date },
 
 });
