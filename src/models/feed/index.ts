@@ -110,7 +110,7 @@ const FeedSchema: Schema = new Schema({
         groupIds: [{ type: String }],
         donationIds: [{ type: Number }],
     },
-    createdByGroupId: { type: Number },
+    createdByGroupId: { type: String },
     createdAt: { type: Date }
 });
 

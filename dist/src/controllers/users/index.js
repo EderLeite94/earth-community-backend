@@ -69,7 +69,7 @@ router.post('/auth/user/sign-in', index_2.validateSignIn, async (req, res) => {
             id: user.info._id,
         }, secret || '');
         res.status(200).json({
-            message: 'Usuário logado com sucesso',
+            message: 'Usuário autenticado!',
             token,
             user,
             groups
