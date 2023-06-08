@@ -37,7 +37,7 @@ router.post('/group/create/:id', async (req, res) => {
     }
     try {
         const newGroup = await index_1.default.create(group);
-        await index_2.default.updateOne({ $push: { groupIds: newGroup._id } });
+        await index_2.default.updateOne({ $push: { members: newGroup._id } });
         return res.status(201).json({
             message: 'Grupo criado com sucesso!',
             group,
@@ -48,17 +48,19 @@ router.post('/group/create/:id', async (req, res) => {
         return res.status(500).json({ error: error });
     }
 });
-// Delete group
 router.delete('/group/delete/:id/:userId', async (req, res) => {
+    const { id, userId } = req.params;
     try {
-        const { id, userId } = req.params;
         const group = await index_1.default.findById(id);
         if (!group) {
             return res.status(404).json({ error: 'Grupo não encontrado' });
         }
-        // if (group.createdByUser !== userId) {
-        //   return res.status(401).json({ error: 'Você não tem permissão para excluir este grupo' });
-        // }
+        const userCreated = await index_1.default.findById({ 'createdByUser.user._id': userId });
+        // const userExists = group.createdByUser.find((createdByUser) => createdByUser.user._id.toString() === userId.toString());
+        console.log(userCreated);
+        if (!userCreated) {
+            return res.status(401).json({ error: 'Você não tem permissão para excluir este grupo' });
+        }
         await index_1.default.findByIdAndDelete(id);
         await index_2.default.updateMany({ $pull: { groupIds: id } });
         res.status(200).json({ message: 'Grupo excluído com sucesso' });
@@ -100,10 +102,10 @@ router.post('/group/add-member/:id/:userId', async (req, res) => {
     try {
         const group = await index_1.default.findById(id);
         if (!group) {
-            return res.status(404).json({ error: 'Group not found' });
+            return res.status(404).json({ error: 'Grupo não encontrado!' });
         }
         // Check if userId already exists in the members array
-        const userExists = group.members.find(member => member.user.info._id.toString() === userId);
+        const userExists = group.members.find((members) => members.user._id.toString() === userId);
         if (userExists) {
             return res.status(400).json({ error: 'Usuário já é membro deste grupo' });
         }
@@ -111,8 +113,9 @@ router.post('/group/add-member/:id/:userId', async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: 'Usuário não encontrado!' });
         }
-        await index_1.default.findByIdAndUpdate(id, { $addToSet: { members: { user } } });
-        await index_2.default.findByIdAndUpdate(userId, { $addToSet: { groupIds: id } });
+        group.members.push({ user });
+        user.groupIds.push(id);
+        await Promise.all([group.save(), user.save()]);
         res.status(200).json({ message: 'Usuário adicionado com sucesso' });
     }
     catch (error) {
@@ -124,14 +127,18 @@ router.delete('/group/remove-member/:id/:userId', async (req, res) => {
     const { id, userId } = req.params;
     try {
         const group = await index_1.default.findById(id);
-        const UserExist = await index_1.default.findOne({ memberIds: userId });
         if (!group) {
             return res.status(404).json({ error: 'Grupo não encontrado' });
         }
-        if (!UserExist) {
+        const userExists = group.members.find((member) => member.user._id.toString() === userId);
+        if (!userExists) {
             return res.status(400).json({ error: 'Usuário não é membro deste grupo' });
         }
-        await index_1.default.findByIdAndUpdate(id, { $pull: { memberIds: userId } });
+        // Remove the user from the members array
+        group.members = group.members.filter((member) => member.user._id.toString() !== userId);
+        // Save the updated group
+        await group.save();
+        // Remove the group ID from the user's groupIds array
         await index_2.default.findByIdAndUpdate(userId, { $pull: { groupIds: id } });
         res.status(200).json({ message: 'Usuário removido com sucesso' });
     }
