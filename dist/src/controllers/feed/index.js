@@ -105,7 +105,7 @@ router.get('/post/get-by-id/:id', async (req, res) => {
     }
 });
 // Get - Post createdByGroupId
-router.get('/post/get-by-group-id/:id', async (req, res) => {
+router.get('/post/get-group-by-id/:id', async (req, res) => {
     const id = req.params.id;
     try {
         const post = await index_1.default.find({ createdByGroupId: id });
