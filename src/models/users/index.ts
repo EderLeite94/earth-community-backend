@@ -33,10 +33,10 @@ const UsersSchema: Schema = new Schema({
         firstName: { type: String, required: true },
         surname: { type: String, required: true },
         email: { type: String, required: true, unique: true },
-        about: { type: String },
-        dateOfBirth: { type: Date },
-        pictureProfile: { type: String },
-        phone: { type: String },
+        about: { type: String, default: null },
+        dateOfBirth: { type: Date, default: null },
+        pictureProfile: { type: String, default: null },
+        phone: { type: String, default: null },
     },
     security: {
         authWith: { type: String, enum: ['google', 'facebook', 'manually'] },
@@ -44,11 +44,11 @@ const UsersSchema: Schema = new Schema({
         accountCreateDate: { type: Date },
     },
     address: {
-        city: { type: String },
-        state: { type: String },
+        city: { type: String, default: null },
+        state: { type: String, default: null },
     },
-    groupIds: [{ type: String }],
-    donationIds: [{ type: Number }],
+    groupIds: [{ type: String, default: [] }],
+    donationIds: [{ type: Number, default: [] }],
 });
 
 export interface IUsersWithId extends IUsers {
