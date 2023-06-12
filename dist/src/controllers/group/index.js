@@ -83,11 +83,48 @@ router.get('/group/get-all', async (req, res) => {
         res.status(500).json({ error: error });
     }
 });
+router.get('/group/get-all/:name?/:city?/:state?', async (req, res) => {
+    // Function to remove accents from a string
+    function removeAccents(text) {
+        return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+    try {
+        const { name, city, state } = req.params;
+        const filter = {};
+        if (name) {
+            filter.name = { $regex: new RegExp(removeAccents(name), 'i') };
+        }
+        if (city) {
+            filter['headOffice.city'] = { $regex: new RegExp(removeAccents(city), 'i') };
+        }
+        if (state) {
+            filter['headOffice.state'] = { $regex: new RegExp(removeAccents(state), 'i') };
+        }
+        const groups = await index_1.default.where(filter);
+        if (name && groups.length === 0) {
+            return res.status(404).json({ error: 'O grupo não existe' });
+        }
+        if (city && groups.length === 0) {
+            return res.status(404).json({ error: 'Nenhum grupo encontrado na cidade especificada' });
+        }
+        if (state && groups.length === 0) {
+            return res.status(404).json({ error: 'Nenhum grupo encontrado no estado especificado' });
+        }
+        res.status(200).json({ groups });
+    }
+    catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error });
+    }
+});
 //Get-by-id group
 router.get('/group/get-by-id/:id', async (req, res) => {
-    const id = req.params;
+    const id = req.params.id;
     try {
-        const group = await index_1.default.findOne({ id });
+        const group = await index_1.default.findOne({ _id: id });
+        if (!group) {
+            return res.status(404).json({ error: 'Grupo não encontrado' });
+        }
         res.status(201).json({
             group
         });
@@ -100,22 +137,21 @@ router.get('/group/get-by-id/:id', async (req, res) => {
 router.post('/group/add-member/:id/:userId', async (req, res) => {
     const { id, userId } = req.params;
     try {
-        const group = await index_1.default.findById(id);
-        if (!group) {
-            return res.status(404).json({ error: 'Grupo não encontrado!' });
-        }
-        // Check if userId already exists in the members array
-        const userExists = group.members.find((members) => members.user._id.toString() === userId);
-        if (userExists) {
-            return res.status(400).json({ error: 'Usuário já é membro deste grupo' });
-        }
         const user = await index_2.default.findById(userId);
         if (!user) {
-            return res.status(404).json({ error: 'Usuário não encontrado!' });
+            return res.status(404).json({ error: 'Usuário não encontrado' });
         }
-        group.members.push({ user });
-        user.groupIds.push(id);
-        await Promise.all([group.save(), user.save()]);
+        const group = await index_1.default.findById(id);
+        if (!group) {
+            return res.status(404).json({ message: 'Grupo não encontrado' });
+        }
+        const userExists = await index_1.default.findOne({ 'members.user._id': userId });
+        // Verifica se o userId já está presente no array memberIds
+        if (userExists) {
+            return res.status(400).json({ message: 'Usuário já é membro deste grupo' });
+        }
+        await index_1.default.findByIdAndUpdate(id, { $addToSet: { members: { user: user } } });
+        await index_2.default.findByIdAndUpdate(userId, { $addToSet: { groupIds: id } });
         res.status(200).json({ message: 'Usuário adicionado com sucesso' });
     }
     catch (error) {
@@ -126,19 +162,25 @@ router.post('/group/add-member/:id/:userId', async (req, res) => {
 router.delete('/group/remove-member/:id/:userId', async (req, res) => {
     const { id, userId } = req.params;
     try {
+        const user = await index_2.default.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
         const group = await index_1.default.findById(id);
         if (!group) {
-            return res.status(404).json({ error: 'Grupo não encontrado' });
+            return res.status(404).json({ message: 'Grupo não encontrado' });
         }
-        const userExists = group.members.find((member) => member.user._id.toString() === userId);
-        if (!userExists) {
+        const UserExist = await index_1.default.findOne({ 'members.user._id': userId });
+        console.log(UserExist);
+        if (!UserExist) {
             return res.status(400).json({ error: 'Usuário não é membro deste grupo' });
         }
         // Remove the user from the members array
-        group.members = group.members.filter((member) => member.user._id.toString() !== userId);
+        await index_1.default.updateOne({ $pull: { members: { 'user._id': userId } } });
         // Save the updated group
         await group.save();
         // Remove the group ID from the user's groupIds array
+        await index_1.default.findByIdAndUpdate(id, { $pull: { members: { user: { _id: userId } } } });
         await index_2.default.findByIdAndUpdate(userId, { $pull: { groupIds: id } });
         res.status(200).json({ message: 'Usuário removido com sucesso' });
     }
