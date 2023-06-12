@@ -33,7 +33,27 @@ const GroupSchema = new mongoose_1.Schema({
         city: { type: String },
         state: { type: String },
     },
-    members: (Array),
+    members: [{
+            user: {
+                _id: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
+                info: {
+                    firstName: { type: String },
+                    surname: { type: String },
+                    email: { type: String },
+                    dateOfBirth: { type: Date },
+                    phone: { type: String },
+                },
+                security: {
+                    authWith: { type: String, enum: ['google', 'facebook', 'manually'] },
+                    password: { type: String },
+                    accountCreateDate: { type: Date },
+                },
+                address: {
+                    city: { type: String },
+                    state: { type: String },
+                },
+            }
+        }],
     createdByUser: (Array),
     createdAt: { type: Date },
 });
