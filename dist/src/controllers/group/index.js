@@ -70,7 +70,7 @@ router.delete('/group/delete/:id/:userId', async (req, res) => {
     }
 });
 //Get-All group
-router.get('/group/get-all/:name?/:city?/:state?/:category?', async (req, res) => {
+router.get('/group/get-all', async (req, res) => {
     try {
         const name = req.query.name || '';
         const city = req.query.city || '';

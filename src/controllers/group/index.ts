@@ -71,7 +71,7 @@ router.delete('/group/delete/:id/:userId', async (req: Request, res: Response) =
 });
 
 //Get-All group
-router.get('/group/get-all/:name?/:city?/:state?/:category?', async (req: Request, res: Response) => {
+router.get('/group/get-all', async (req: Request, res: Response) => {
   try {
     const name: string = req.query.name as string || '';
     const city: string = req.query.city as string || '';
