@@ -204,5 +204,24 @@ router.get('/search', async (req: Request, res: Response) => {
     res.status(500).json({ error: error });
   }
 });
+router.patch('/group/update-by-id/:id', async (req: Request, res: Response) => {
+  const id: string = req.params.id;
+  const { name, image, description, category, headOffice } = req.body;
+  const { city, state } = headOffice;
 
+  try {
+    const attgroup = await Group.findById(id);
+    if (!attgroup) {
+      return res.status(422).json({ error: 'Grupo não encontrado!' });
+    }
+    const updateGroup = await Group.updateOne({ _id: id }, req.body);
+    const group = await Group.findById(id);
+    return res.status(200).json({
+      message: 'Dados atualizados com sucesso!',
+      group
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error });
+  }
+});
 export default router;
