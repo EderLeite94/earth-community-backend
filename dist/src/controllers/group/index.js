@@ -25,7 +25,7 @@ router.post('/group/create/:id', async (req, res) => {
         description,
         category,
         headOffice,
-        members: user,
+        members: [{ user }],
         createdByUser: user,
         createdAt: now
     };
@@ -159,11 +159,11 @@ router.delete('/group/remove-member/:id/:userId', async (req, res) => {
             return res.status(400).json({ error: 'Usuário não é membro deste grupo' });
         }
         // Remove the user from the members array
-        await index_1.default.updateOne({ $pull: { members: { 'user._id': userId } } });
+        await index_1.default.updateOne({ $pull: { members: { user: { _id: userId } } } });
         // Save the updated group
         await group.save();
         // Remove the group ID from the user's groupIds array
-        await index_1.default.findByIdAndUpdate(id, { $pull: { members: { user: { _id: userId } } } });
+        await index_1.default.findByIdAndUpdate(id, { $pull: { members: { 'user._id': userId } } });
         await index_2.default.findByIdAndUpdate(userId, { $pull: { groupIds: id } });
         res.status(200).json({ message: 'Usuário removido com sucesso' });
     }

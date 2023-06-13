@@ -23,7 +23,7 @@ router.post('/group/create/:id', async (req: Request, res: Response) => {
     description,
     category,
     headOffice,
-    members: user,
+    members: [{ user }],
     createdByUser: user,
     createdAt: now
   }
@@ -77,8 +77,8 @@ router.get('/group/get-all', async (req: Request, res: Response) => {
     const city: string = req.query.city as string || '';
     const state: string = req.query.state as string || '';
     const category: string = req.query.category as string || '';
-    const page = parseInt(req.query.page as string) || 1; 
-    const pageSize = parseInt(req.query.pageSize as string) || 5; 
+    const page = parseInt(req.query.page as string) || 1;
+    const pageSize = parseInt(req.query.pageSize as string) || 5;
 
     const totalCount = await Group.countDocuments(); // Total de documentos 
     const totalPages = Math.ceil(totalCount / pageSize); // Total de páginas
@@ -162,11 +162,11 @@ router.delete('/group/remove-member/:id/:userId', async (req: Request, res: Resp
       return res.status(400).json({ error: 'Usuário não é membro deste grupo' });
     }
     // Remove the user from the members array
-    await Group.updateOne({ $pull: { members: { 'user._id': userId } } })
+    await Group.updateOne({ $pull: { members: { user: { _id: userId } } } })
     // Save the updated group
     await group.save();
     // Remove the group ID from the user's groupIds array
-    await Group.findByIdAndUpdate(id, { $pull: { members: { user: { _id: userId } } } });
+    await Group.findByIdAndUpdate(id, { $pull: { members: { 'user._id': userId } } });
     await Users.findByIdAndUpdate(userId, { $pull: { groupIds: id } });
     res.status(200).json({ message: 'Usuário removido com sucesso' });
   } catch (error) {
