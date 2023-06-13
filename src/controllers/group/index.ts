@@ -36,9 +36,6 @@ router.post('/group/create/:id', async (req: Request, res: Response) => {
   }
   try {
     const newGroup = await Group.create(group);
-    await Users.updateOne(
-      { $push: { members: newGroup._id } }
-    );
     return res.status(201).json({
       message: 'Grupo criado com sucesso!',
       group,
@@ -74,18 +71,37 @@ router.delete('/group/delete/:id/:userId', async (req: Request, res: Response) =
 });
 
 //Get-All group
-router.get('/group/get-all', async (req: Request, res: Response) => {
+router.get('/group/get-all/:name?/:city?/:state?/:category?', async (req: Request, res: Response) => {
   try {
-    const group = await Group.find();
-    res.status(201).json({
-      group
+    const name: string = req.query.name as string || '';
+    const city: string = req.query.city as string || '';
+    const state: string = req.query.state as string || '';
+    const category: string = req.query.category as string || '';
+    const page = parseInt(req.query.page as string) || 1; 
+    const pageSize = parseInt(req.query.pageSize as string) || 5; 
+
+    const totalCount = await Group.countDocuments(); // Total de documentos 
+    const totalPages = Math.ceil(totalCount / pageSize); // Total de páginas
+    const nameFilter = name ? { name: { $regex: new RegExp(name, 'i') } } : {};
+    const cityFilter = city ? { 'headOffice.city': { $regex: new RegExp(city, 'i') } } : {};
+    const stateFilter = state ? { 'headOffice.state': { $regex: new RegExp(state, 'i') } } : {};
+    const categoryFilter = category ? { category: { $regex: new RegExp(category, 'i') } } : {};
+    const groups = await Group.find({ ...nameFilter, ...cityFilter, ...stateFilter, ...categoryFilter })
+      .skip((page - 1) * pageSize) // Ignorar documentos nas páginas anteriores
+      .limit(pageSize); // Limitar o número de documentos retornados por página
+
+    res.status(200).json({
+      groups,
+      page,
+      pageSize,
+      totalCount,
+      totalPages
     });
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: error });
   }
 });
-
 //Get-by-id group
 router.get('/group/get-by-id/:id', async (req: Request, res: Response) => {
   const id = req.params.id;
