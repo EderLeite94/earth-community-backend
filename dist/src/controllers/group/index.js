@@ -37,7 +37,6 @@ router.post('/group/create/:id', async (req, res) => {
     }
     try {
         const newGroup = await index_1.default.create(group);
-        await index_2.default.updateOne({ $push: { members: newGroup._id } });
         return res.status(201).json({
             message: 'Grupo criado com sucesso!',
             group,
@@ -73,48 +72,32 @@ router.delete('/group/delete/:id/:userId', async (req, res) => {
 //Get-All group
 router.get('/group/get-all', async (req, res) => {
     try {
-        const group = await index_1.default.find();
-        res.status(201).json({
-            group
+        const name = req.query.name || '';
+        const city = req.query.city || '';
+        const state = req.query.state || '';
+        const category = req.query.category || '';
+        const page = parseInt(req.query.page) || 1;
+        const pageSize = parseInt(req.query.pageSize) || 5;
+        const totalCount = await index_1.default.countDocuments(); // Total de documentos 
+        const totalPages = Math.ceil(totalCount / pageSize); // Total de páginas
+        const nameFilter = name ? { name: { $regex: new RegExp(name, 'i') } } : {};
+        const cityFilter = city ? { 'headOffice.city': { $regex: new RegExp(city, 'i') } } : {};
+        const stateFilter = state ? { 'headOffice.state': { $regex: new RegExp(state, 'i') } } : {};
+        const categoryFilter = category ? { category: { $regex: new RegExp(category, 'i') } } : {};
+        const groups = await index_1.default.find(Object.assign(Object.assign(Object.assign(Object.assign({}, nameFilter), cityFilter), stateFilter), categoryFilter))
+            .skip((page - 1) * pageSize) // Ignorar documentos nas páginas anteriores
+            .limit(pageSize); // Limitar o número de documentos retornados por página
+        res.status(200).json({
+            groups,
+            page,
+            pageSize,
+            totalCount,
+            totalPages
         });
     }
     catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: error });
-    }
-});
-router.get('/group/get-all/:name?/:city?/:state?', async (req, res) => {
-    // Function to remove accents from a string
-    function removeAccents(text) {
-        return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    }
-    try {
-        const { name, city, state } = req.params;
-        const filter = {};
-        if (name) {
-            filter.name = { $regex: new RegExp(removeAccents(name), 'i') };
-        }
-        if (city) {
-            filter['headOffice.city'] = { $regex: new RegExp(removeAccents(city), 'i') };
-        }
-        if (state) {
-            filter['headOffice.state'] = { $regex: new RegExp(removeAccents(state), 'i') };
-        }
-        const groups = await index_1.default.where(filter);
-        if (name && groups.length === 0) {
-            return res.status(404).json({ error: 'O grupo não existe' });
-        }
-        if (city && groups.length === 0) {
-            return res.status(404).json({ error: 'Nenhum grupo encontrado na cidade especificada' });
-        }
-        if (state && groups.length === 0) {
-            return res.status(404).json({ error: 'Nenhum grupo encontrado no estado especificado' });
-        }
-        res.status(200).json({ groups });
-    }
-    catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ error });
     }
 });
 //Get-by-id group
