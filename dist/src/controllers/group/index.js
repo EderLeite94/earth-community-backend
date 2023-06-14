@@ -57,12 +57,10 @@ router.delete('/group/delete/:id/:userId', async (req, res) => {
         if (!group) {
             return res.status(404).json({ error: 'Grupo não encontrado' });
         }
-        // const userCreated = await Group.findById({ 'createdByUser.user._id': userId })
-        // // const userExists = group.createdByUser.find((createdByUser) => createdByUser.user._id.toString() === userId.toString());
-        // console.log(userCreated)
-        // if (!userCreated) {
-        //   return res.status(401).json({ error: 'Você não tem permissão para excluir este grupo' });
-        // }
+        const userCreated = await index_1.default.findOne({ 'createdByUser.user._id': userId });
+        if (!userCreated) {
+            return res.status(401).json({ error: 'Você não tem permissão para excluir este grupo' });
+        }
         await index_1.default.findByIdAndDelete(id);
         await index_2.default.updateMany({ $pull: { groupIds: id } });
         res.status(200).json({ message: 'Grupo excluído com sucesso' });
@@ -133,8 +131,9 @@ router.post('/group/add-member/:id/:userId', async (req, res) => {
         }
         const userExists = await index_1.default.findOne({ 'members.user._id': userId });
         // Verifica se o userId já está presente no array memberIds
+        console.log(userExists);
         if (userExists) {
-            return res.status(400).json({ message: 'Usuário já é membro deste grupo' });
+            return res.status(400).json({ error: 'Usuário já é membro deste grupo' });
         }
         await index_1.default.findByIdAndUpdate(id, { $addToSet: { members: { user: user } } });
         await index_2.default.findByIdAndUpdate(userId, { $addToSet: { groupIds: id } });
@@ -237,6 +236,32 @@ router.get('/group/trending-groups', async (req, res) => {
             { $skip: (page - 1) * pageSize },
             { $limit: pageSize } // Limitar o número de documentos retornados por página
         ]);
+        res.status(200).json({
+            groups,
+            page,
+            pageSize,
+            totalCount,
+            totalPages
+        });
+    }
+    catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: error });
+    }
+});
+router.get('/group/get-by-user-id/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const page = parseInt(req.query.page) || 1;
+        const pageSize = parseInt(req.query.pageSize) || 10;
+        if (!userId) {
+            return res.status(422).json({ error: 'Informe um usuário!' });
+        }
+        const totalCount = await index_1.default.countDocuments(); // Total de documentos 
+        const totalPages = Math.ceil(totalCount / pageSize); // Total de páginas
+        const groups = await index_1.default.find({ 'members.user._id': userId })
+            .skip((page - 1) * pageSize) // Ignorar documentos nas páginas anteriores
+            .limit(pageSize); // Limitar o número de documentos retornados por página
         res.status(200).json({
             groups,
             page,
