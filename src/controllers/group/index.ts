@@ -24,7 +24,7 @@ router.post('/group/create/:id', async (req: Request, res: Response) => {
     category,
     headOffice,
     members: [{ user }],
-    createdByUser: user,
+    createdByUser: [{ user }],
     createdAt: now
   }
 
@@ -224,7 +224,7 @@ router.patch('/group/update-by-id/:id', async (req: Request, res: Response) => {
     return res.status(500).json({ error: error });
   }
 });
-router.get('/group/trending-groups/get-all', async (req: Request, res: Response) => {
+router.get('/group/trending-groups', async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const pageSize = parseInt(req.query.pageSize as string) || 5;
