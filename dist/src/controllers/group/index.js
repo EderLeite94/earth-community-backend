@@ -26,7 +26,7 @@ router.post('/group/create/:id', async (req, res) => {
         category,
         headOffice,
         members: [{ user }],
-        createdByUser: user,
+        createdByUser: [{ user }],
         createdAt: now
     };
     if (!name) {
@@ -217,7 +217,7 @@ router.patch('/group/update-by-id/:id', async (req, res) => {
         return res.status(500).json({ error: error });
     }
 });
-router.get('/group/trending-groups/get-all', async (req, res) => {
+router.get('/group/trending-groups', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const pageSize = parseInt(req.query.pageSize) || 5;
