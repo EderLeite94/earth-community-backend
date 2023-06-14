@@ -26,7 +26,10 @@ router.post('/group/create/:id', async (req, res) => {
         category,
         headOffice,
         members: [{ user }],
-        createdByUser: [{ user }],
+        createdByUser: {
+            _id: user._id,
+            user: user
+        },
         createdAt: now
     };
     if (!name) {

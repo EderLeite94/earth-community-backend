@@ -97,26 +97,29 @@ const GroupSchema: Schema = new Schema({
         }
     }],
     createdByUser: {
-        info: {
-            nickName: { type: String },
-            firstName: { type: String },
-            surname: { type: String },
-            email: { type: String },
-            dateOfBirth: { type: Date },
-            pictureProfile: { type: String },
-            phone: { type: String },
-        },
-        security: {
-            authWith: { type: String, enum: ['google', 'facebook', 'manually'] },
-            password: { type: String },
-            accountCreateDate: { type: Date },
-        },
-        address: {
-            city: { type: String },
-            state: { type: String },
-        },
-        groupIds: [{ type: String }],
-        donationIds: [{ type: Number }],
+        user: {
+            _id: { type: Schema.Types.ObjectId, ref: 'User' },
+            info: {
+                nickName: { type: String },
+                firstName: { type: String },
+                surname: { type: String },
+                email: { type: String },
+                dateOfBirth: { type: Date },
+                pictureProfile: { type: String },
+                phone: { type: String },
+            },
+            security: {
+                authWith: { type: String, enum: ['google', 'facebook', 'manually'] },
+                password: { type: String },
+                accountCreateDate: { type: Date },
+            },
+            address: {
+                city: { type: String },
+                state: { type: String },
+            },
+            groupIds: [{ type: String }],
+            donationIds: [{ type: Number }],
+        }
     },
     createdAt: { type: Date },
 
