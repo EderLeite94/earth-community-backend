@@ -56,12 +56,10 @@ router.delete('/group/delete/:id/:userId', async (req: Request, res: Response) =
     if (!group) {
       return res.status(404).json({ error: 'Grupo não encontrado' });
     }
-    // const userCreated = await Group.findById({ 'createdByUser.user._id': userId })
-    // // const userExists = group.createdByUser.find((createdByUser) => createdByUser.user._id.toString() === userId.toString());
-    // console.log(userCreated)
-    // if (!userCreated) {
-    //   return res.status(401).json({ error: 'Você não tem permissão para excluir este grupo' });
-    // }
+    const userCreated = await Group.findOne({ 'createdByUser.user._id': userId })
+    if (!userCreated) {
+      return res.status(401).json({ error: 'Você não tem permissão para excluir este grupo' });
+    }
 
     await Group.findByIdAndDelete(id);
     await Users.updateMany({ $pull: { groupIds: id } });
