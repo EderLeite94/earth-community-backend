@@ -217,5 +217,35 @@ router.patch('/group/update-by-id/:id', async (req, res) => {
         return res.status(500).json({ error: error });
     }
 });
+router.get('/group/trending-groups/get-all', async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const pageSize = parseInt(req.query.pageSize) || 5;
+        const totalCount = await index_1.default.countDocuments(); // Total de documentos 
+        const totalPages = Math.ceil(totalCount / pageSize); // Total de páginas
+        const groups = await index_1.default.aggregate([
+            {
+                $match: {
+                    $expr: {
+                        $gte: [{ $size: "$members" }, 10] // Filtra os grupos com 10 ou mais membros
+                    }
+                }
+            },
+            { $skip: (page - 1) * pageSize },
+            { $limit: pageSize } // Limitar o número de documentos retornados por página
+        ]);
+        res.status(200).json({
+            groups,
+            page,
+            pageSize,
+            totalCount,
+            totalPages
+        });
+    }
+    catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: error });
+    }
+});
 exports.default = router;
 //# sourceMappingURL=index.js.map

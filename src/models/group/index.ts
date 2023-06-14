@@ -33,7 +33,7 @@ export interface IGroup {
             };
         }
     }>,
-    createdByUser: Array<{
+    createdByUser: {
         user: {
             _id: any;
             info: {
@@ -58,7 +58,7 @@ export interface IGroup {
         }
         groupIds: string[];
         donationIds: number[];
-    }>,
+    },
     createdAt: Date;
 }
 
@@ -96,7 +96,7 @@ const GroupSchema: Schema = new Schema({
             },
         }
     }],
-    createdByUser: Array<{
+    createdByUser: {
         info: {
             nickName: { type: String },
             firstName: { type: String },
@@ -117,7 +117,7 @@ const GroupSchema: Schema = new Schema({
         },
         groupIds: [{ type: String }],
         donationIds: [{ type: Number }],
-    }>,
+    },
     createdAt: { type: Date },
 
 });
