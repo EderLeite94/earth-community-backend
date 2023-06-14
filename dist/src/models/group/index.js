@@ -37,10 +37,12 @@ const GroupSchema = new mongoose_1.Schema({
             user: {
                 _id: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
                 info: {
+                    nickName: { type: String },
                     firstName: { type: String },
                     surname: { type: String },
                     email: { type: String },
                     dateOfBirth: { type: Date },
+                    pictureProfile: { type: String },
                     phone: { type: String },
                 },
                 security: {

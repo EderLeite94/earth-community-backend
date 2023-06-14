@@ -13,10 +13,13 @@ export interface IFeed {
         user: {
             info: {
                 _id: any;
+                nickName: string;
                 firstName: string;
                 surname: string;
                 email: string;
+                about: string;
                 dateOfBirth: Date;
+                pictureProfile: string;
                 phone: string;
             };
             security: {
@@ -34,10 +37,13 @@ export interface IFeed {
     }>;
     createdByUser: {
         info: {
+            nickName: string;
             firstName: string;
             surname: string;
             email: string;
+            about: string;
             dateOfBirth: Date;
+            pictureProfile: string;
             phone: string;
         };
         security: {
@@ -52,7 +58,20 @@ export interface IFeed {
         groupIds: string[];
         donationIds: number[];
     };
-    createdByGroupId: string;
+    createdByGroup: {
+        _id: any;
+        group: {
+            _id: any;
+            name: string;
+            image: string;
+            description: string;
+            category: string;
+            headOffice: {
+                city: string;
+                state: string;
+            }
+        };
+    };
     createdAt: Date;
 }
 
@@ -110,7 +129,17 @@ const FeedSchema: Schema = new Schema({
         groupIds: [{ type: String }],
         donationIds: [{ type: Number }],
     },
-    createdByGroupId: { type: String },
+    createdByGroup: {
+        _id: { type: Schema.Types.ObjectId, ref: 'Group' },
+        name: { type: String },
+        image: { type: String },
+        description: { type: String },
+        category: { type: String },
+        headOffice: {
+            city: { type: String },
+            state: { type: String },
+        },
+    },
     createdAt: { type: Date }
 });
 

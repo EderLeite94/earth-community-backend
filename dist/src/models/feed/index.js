@@ -52,7 +52,17 @@ const FeedSchema = new mongoose_1.Schema({
         groupIds: [{ type: String }],
         donationIds: [{ type: Number }],
     },
-    createdByGroupId: { type: String },
+    createdByGroup: {
+        _id: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Group' },
+        name: { type: String },
+        image: { type: String },
+        description: { type: String },
+        category: { type: String },
+        headOffice: {
+            city: { type: String },
+            state: { type: String },
+        },
+    },
     createdAt: { type: Date }
 });
 const Post = mongoose_1.default.model('Post', FeedSchema);

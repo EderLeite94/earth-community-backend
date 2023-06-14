@@ -26,7 +26,7 @@ router.post('/post/create/:id/:groupID', async (req: Request, res: Response) => 
         image,
         createdByUser: user,
         createdAt: now,
-        createdByGroupId: groupID
+        createdByGroup: group
     }
 
     if (!text) {
@@ -116,8 +116,8 @@ router.get('/post/get-group-by-id/:id', async (req: Request, res: Response) => {
     const id = req.params.id;
 
     try {
-        const post = await Post.find({ createdByGroupId: id });
-
+        const post = await Post.find({ 'createdByGroup._id': id });
+        console.log(post)
         if (!post) {
             res.status(422).json({ error: 'Post não encontrado!' });
             return;
