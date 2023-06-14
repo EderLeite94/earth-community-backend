@@ -14,10 +14,12 @@ export interface IGroup {
             _id: any;
             info: {
                 _id: any;
+                nickName: string;
                 firstName: string;
                 surname: string;
                 email: string;
                 dateOfBirth: Date;
+                pictureProfile: string;
                 phone: string;
             };
             security: {
@@ -36,10 +38,12 @@ export interface IGroup {
             _id: any;
             info: {
                 _id: any;
+                nickName: string;
                 firstName: string;
                 surname: string;
                 email: string;
                 dateOfBirth: Date;
+                pictureProfile: string;
                 phone: string;
             };
             security: {
@@ -73,10 +77,12 @@ const GroupSchema: Schema = new Schema({
         user: {
             _id: { type: Schema.Types.ObjectId, ref: 'User' },
             info: {
+                nickName: { type: String },
                 firstName: { type: String },
                 surname: { type: String },
                 email: { type: String },
                 dateOfBirth: { type: Date },
+                pictureProfile: { type: String },
                 phone: { type: String },
             },
             security: {
@@ -92,10 +98,12 @@ const GroupSchema: Schema = new Schema({
     }],
     createdByUser: Array<{
         info: {
+            nickName: { type: String },
             firstName: { type: String },
             surname: { type: String },
             email: { type: String },
             dateOfBirth: { type: Date },
+            pictureProfile: { type: String },
             phone: { type: String },
         },
         security: {
