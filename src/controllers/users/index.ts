@@ -116,13 +116,34 @@ router.patch('/user/update-by-id/:id', async (req: Request, res: Response) => {
           'comments.$[elem].user.address.state': state,
         }
       },
+
+      { arrayFilters: [{ 'elem.user._id': new mongoose.Types.ObjectId(id) }] }
+    );
+    const updateCreated = await Post.updateMany(
+      { 'createdByUser._id': new mongoose.Types.ObjectId(id) },
+      {
+        $set: {
+          'comments.$[elem].user.info.nickName': nickName,
+          'comments.$[elem].user.info.firstName': firstName,
+          'comments.$[elem].user.info.surname': surname,
+          'comments.$[elem].info.email': email,
+          'comments.$[elem].user.info.about': about,
+          'comments.$[elem].user.info.dateOfBirth': dateOfBirth,
+          'comments.$[elem].user.info.pictureProfile': pictureProfile,
+          'comments.$[elem].user.info.phone': phone,
+          'comments.$[elem].user.address.city': city,
+          'comments.$[elem].user.address.state': state,
+        }
+      },
+
       { arrayFilters: [{ 'elem.user._id': new mongoose.Types.ObjectId(id) }] }
     );
 
     return res.status(200).json({
       message: 'Dados atualizados com sucesso!',
       user,
-      updatedPosts
+      updatedPosts,
+      updateCreated
     });
   } catch (error) {
     return res.status(500).json({ error: error });

@@ -33,24 +33,29 @@ const FeedSchema = new mongoose_1.Schema({
     },
     comments: (Array),
     createdByUser: {
-        info: {
-            nickName: { type: String },
-            firstName: { type: String },
-            surname: { type: String },
-            email: { type: String },
-            about: { type: String },
-            dateOfBirth: { type: Date },
-            pictureProfile: { type: String },
-            phone: { type: String },
-        },
-        security: {
-            authWith: { type: String, enum: ['google', 'facebook', 'manually'] },
-            password: { type: String },
-            accountCreateDate: { type: Date },
-        },
-        address: {
-            city: { type: String },
-            state: { type: String },
+        user: {
+            _id: {
+                type: mongoose_1.default.Schema.Types.ObjectId
+            },
+            info: {
+                nickName: { type: String },
+                firstName: { type: String },
+                surname: { type: String },
+                email: { type: String },
+                about: { type: String },
+                dateOfBirth: { type: Date },
+                pictureProfile: { type: String },
+                phone: { type: String },
+            },
+            security: {
+                authWith: { type: String, enum: ['google', 'facebook', 'manually'] },
+                password: { type: String },
+                accountCreateDate: { type: Date },
+            },
+            address: {
+                city: { type: String },
+                state: { type: String },
+            },
         },
         groupIds: [{ type: String }],
         donationIds: [{ type: Number }],
