@@ -115,10 +115,6 @@ router.get('/post/get-group-by-id/:id', async (req, res) => {
         const posts = await index_1.default.find({ 'createdByGroup._id': id })
             .skip((page - 1) * perPage)
             .limit(perPage);
-        // if (posts.length === 0) {
-        //     res.status(422).json({ error: 'Post não encontrado!', page, perPage, totalPages, totalData });
-        //     return;
-        // }
         res.status(200).json({ posts, page, perPage, totalPages, totalData });
     }
     catch (error) {

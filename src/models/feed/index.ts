@@ -90,10 +90,13 @@ const FeedSchema: Schema = new Schema({
         },
         user: {
             info: {
+                nickName: { type: String },
                 firstName: { type: String },
                 surname: { type: String },
                 email: { type: String },
+                about: { type: String },
                 dateOfBirth: { type: Date },
+                pictureProfile: { type: String },
                 phone: { type: String },
             },
             security: {
@@ -111,10 +114,13 @@ const FeedSchema: Schema = new Schema({
     }>,
     createdByUser: {
         info: {
+            nickName: { type: String },
             firstName: { type: String },
             surname: { type: String },
             email: { type: String },
+            about: { type: String },
             dateOfBirth: { type: Date },
+            pictureProfile: { type: String },
             phone: { type: String },
         },
         security: {

@@ -34,10 +34,13 @@ const FeedSchema = new mongoose_1.Schema({
     comments: (Array),
     createdByUser: {
         info: {
+            nickName: { type: String },
             firstName: { type: String },
             surname: { type: String },
             email: { type: String },
+            about: { type: String },
             dateOfBirth: { type: Date },
+            pictureProfile: { type: String },
             phone: { type: String },
         },
         security: {
