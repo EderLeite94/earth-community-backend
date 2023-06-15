@@ -107,14 +107,19 @@ router.get('/post/get-by-id/:id', async (req, res) => {
 // Get - Post createdByGroupId
 router.get('/post/get-group-by-id/:id', async (req, res) => {
     const id = req.params.id;
+    const page = parseInt(req.query.page) || 1; // Página atual (padrão: 1)
+    const perPage = parseInt(req.query.perPage) || 10; // Itens por página (padrão: 10)
     try {
-        const posts = await index_1.default.find({ 'createdByGroup._id': id });
-        console.log(posts);
-        if (!posts) {
-            res.status(422).json({ error: 'Post não encontrado!' });
-            return;
-        }
-        res.status(200).json({ posts });
+        const totalData = await index_1.default.countDocuments({ 'createdByGroup._id': id });
+        const totalPages = Math.ceil(totalData / perPage);
+        const posts = await index_1.default.find({ 'createdByGroup._id': id })
+            .skip((page - 1) * perPage)
+            .limit(perPage);
+        // if (posts.length === 0) {
+        //     res.status(422).json({ error: 'Post não encontrado!', page, perPage, totalPages, totalData });
+        //     return;
+        // }
+        res.status(200).json({ posts, page, perPage, totalPages, totalData });
     }
     catch (error) {
         res.status(500).json({ error: error });
