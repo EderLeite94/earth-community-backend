@@ -112,22 +112,38 @@ router.get('/post/get-by-id/:id', async (req: Request, res: Response) => {
     }
 });
 // Get - Post createdByGroupId
-router.get('/post/get-group-by-id/:id', async (req: Request, res: Response) => {
+router.get('/post/get-group-by-id/:id', async (req, res) => {
     const id = req.params.id;
+    const { page, perPage } = req.query;
+    const pageNumber = parseInt(page as string) || 1;
+    const itemsPerPage = parseInt(perPage as string) || 10;
 
     try {
-        const posts = await Post.find({ 'createdByGroup._id': id });
-        console.log(posts)
-        if (!posts) {
+        const totalData = await Post.countDocuments({ 'createdByGroup._id': id });
+        const totalPages = Math.ceil(totalData / itemsPerPage);
+
+        const posts = await Post.find({ 'createdByGroup._id': id })
+            .skip((pageNumber - 1) * itemsPerPage)
+            .limit(itemsPerPage);
+
+        if (!posts || posts.length === 0) {
             res.status(422).json({ error: 'Post não encontrado!' });
             return;
         }
 
-        res.status(200).json({ posts });
+        res.status(200).json({
+            posts,
+            page: pageNumber,
+            perPage: itemsPerPage,
+            totalPages,
+            totalData,
+        });
     } catch (error) {
+        console.error('Error:', error);
         res.status(500).json({ error: error });
     }
 });
+
 // Like and unlike
 router.post('/post/like/:id/:userId', async (req: Request, res: Response) => {
     const { id, userId } = req.params;
