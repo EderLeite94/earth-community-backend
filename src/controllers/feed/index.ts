@@ -112,34 +112,21 @@ router.get('/post/get-by-id/:id', async (req: Request, res: Response) => {
     }
 });
 // Get - Post createdByGroupId
-router.get('/post/get-group-by-id/:id', async (req, res) => {
+router.get('/post/get-group-by-id/:id', async (req: Request, res: Response) => {
     const id = req.params.id;
-    const { page, perPage } = req.query;
-    const pageNumber = parseInt(page as string) || 1;
-    const itemsPerPage = parseInt(perPage as string) || 10;
+    const page = parseInt(req.query.page as string) || 1; // Página atual (padrão: 1)
+    const perPage = parseInt(req.query.perPage as string) || 10; // Itens por página (padrão: 10)
 
     try {
         const totalData = await Post.countDocuments({ 'createdByGroup._id': id });
-        const totalPages = Math.ceil(totalData / itemsPerPage);
+        const totalPages = Math.ceil(totalData / perPage);
 
         const posts = await Post.find({ 'createdByGroup._id': id })
-            .skip((pageNumber - 1) * itemsPerPage)
-            .limit(itemsPerPage);
+            .skip((page - 1) * perPage)
+            .limit(perPage);
 
-        if (!posts || posts.length === 0) {
-            res.status(422).json({ error: 'Post não encontrado!' });
-            return;
-        }
-
-        res.status(200).json({
-            posts,
-            page: pageNumber,
-            perPage: itemsPerPage,
-            totalPages,
-            totalData,
-        });
+        res.status(200).json({ posts, page, perPage, totalPages, totalData });
     } catch (error) {
-        console.error('Error:', error);
         res.status(500).json({ error: error });
     }
 });
