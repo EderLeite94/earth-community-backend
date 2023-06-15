@@ -36,27 +36,30 @@ export interface IFeed {
         createdAt: Date;
     }>;
     createdByUser: {
-        info: {
-            nickName: string;
-            firstName: string;
-            surname: string;
-            email: string;
-            about: string;
-            dateOfBirth: Date;
-            pictureProfile: string;
-            phone: string;
-        };
-        security: {
-            authWith: 'google' | 'facebook' | 'manually';
-            password: string;
-            accountCreateDate: Date;
-        };
-        address: {
-            city: string;
-            state: string;
-        };
-        groupIds: string[];
-        donationIds: number[];
+        user: {
+            _id: mongoose.Types.ObjectId | undefined | string;
+            info: {
+                nickName: string;
+                firstName: string;
+                surname: string;
+                email: string;
+                about: string;
+                dateOfBirth: Date;
+                pictureProfile: string;
+                phone: string;
+            };
+            security: {
+                authWith: 'google' | 'facebook' | 'manually';
+                password: string;
+                accountCreateDate: Date;
+            };
+            address: {
+                city: string;
+                state: string;
+            };
+            groupIds: [],
+            donationIds: [],
+        }
     };
     createdByGroup: {
         _id: any;
@@ -113,24 +116,29 @@ const FeedSchema: Schema = new Schema({
         createdAt: { type: Date },
     }>,
     createdByUser: {
-        info: {
-            nickName: { type: String },
-            firstName: { type: String },
-            surname: { type: String },
-            email: { type: String },
-            about: { type: String },
-            dateOfBirth: { type: Date },
-            pictureProfile: { type: String },
-            phone: { type: String },
-        },
-        security: {
-            authWith: { type: String, enum: ['google', 'facebook', 'manually'] },
-            password: { type: String },
-            accountCreateDate: { type: Date },
-        },
-        address: {
-            city: { type: String },
-            state: { type: String },
+        user: {
+            _id: {
+                type: mongoose.Schema.Types.ObjectId
+            },
+            info: {
+                nickName: { type: String },
+                firstName: { type: String },
+                surname: { type: String },
+                email: { type: String },
+                about: { type: String },
+                dateOfBirth: { type: Date },
+                pictureProfile: { type: String },
+                phone: { type: String },
+            },
+            security: {
+                authWith: { type: String, enum: ['google', 'facebook', 'manually'] },
+                password: { type: String },
+                accountCreateDate: { type: Date },
+            },
+            address: {
+                city: { type: String },
+                state: { type: String },
+            },
         },
         groupIds: [{ type: String }],
         donationIds: [{ type: Number }],
