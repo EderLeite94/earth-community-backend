@@ -9,7 +9,7 @@ export async function ArtsCulture(id: any): Promise<{ completed: boolean }> {
             'members.user._id': id,
             'category': 'Artes e Cultura'
         });
-        if (userCount >= 1) {
+        if (userCount >= 2) {
             return { completed: true };
         } else {
             return { completed: false };
