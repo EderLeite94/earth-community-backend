@@ -9,7 +9,7 @@ export async function Pets(id: any): Promise<{ completed: boolean }> {
             'members.user._id': id,
             'category': 'Proteção Animal'
         });
-        if (userCount >= 2) {
+        if (userCount >= 1) {
             return { completed: true };
         } else {
             return { completed: false };
