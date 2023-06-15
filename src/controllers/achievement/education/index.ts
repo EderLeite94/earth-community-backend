@@ -9,7 +9,7 @@ export async function Education(id: any): Promise<{ completed: boolean }> {
             'members.user._id': id,
             'category': 'Educação'
         });
-        if (userCount >= 1) {
+        if (userCount >= 2) {
             return { completed: true };
         } else {
             return { completed: false };

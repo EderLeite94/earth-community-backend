@@ -24,10 +24,7 @@ router.post('/post/create/:id/:groupID', async (req: Request, res: Response) => 
     const post = {
         text,
         image,
-        createdByUser: {
-            _id: id,
-            user: user
-        },
+        createdByUser: user,
         createdAt: now,
         createdByGroup: group
     }
