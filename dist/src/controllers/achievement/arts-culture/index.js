@@ -12,7 +12,7 @@ async function ArtsCulture(id) {
             'members.user._id': id,
             'category': 'Artes e Cultura'
         });
-        if (userCount >= 2) {
+        if (userCount >= 1) {
             return { completed: true };
         }
         else {

@@ -17,14 +17,21 @@ router.post('/post/create/:id/:groupID', async (req: Request, res: Response) => 
     const data = new Date();
     const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
     const user = await Users.findOne({ _id: id })
+    if (!user) {
+        return res.status(422).json({ error: 'Usuário não encontrado!' });
+    }
     const group = await Group.findById(groupID)
     if (!group) {
         return res.status(400).send({ error: 'Grupo não encontrado!' });
     }
+
     const post = {
         text,
         image,
-        createdByUser: user,
+        createdByUser: {
+            _id: user._id,
+            user: user
+        },
         createdAt: now,
         createdByGroup: group
     }

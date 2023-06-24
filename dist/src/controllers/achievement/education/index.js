@@ -12,7 +12,7 @@ async function Education(id) {
             'members.user._id': id,
             'category': 'Educação'
         });
-        if (userCount >= 2) {
+        if (userCount >= 1) {
             return { completed: true };
         }
         else {
