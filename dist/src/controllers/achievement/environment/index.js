@@ -12,7 +12,7 @@ async function Environment(id) {
             'members.user._id': id,
             'category': 'Meio Ambiente'
         });
-        if (userCount >= 2) {
+        if (userCount >= 1) {
             return { completed: true };
         }
         else {

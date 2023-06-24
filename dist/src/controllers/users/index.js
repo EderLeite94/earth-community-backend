@@ -88,6 +88,9 @@ router.patch('/user/update-by-id/:id', async (req, res) => {
     const { city, state } = address;
     try {
         const updateUser = await index_1.default.updateOne({ _id: id }, req.body);
+        const member = await group_1.default.updateOne({ 'members.user._id': id }, { $set: { 'members.$.user.info': info, 'members.$.user.address': address } });
+        const createduser = await group_1.default.updateOne({ 'createdByUser.user._id': id }, { $set: { 'createdByUser.user.info': info, 'createdByUser.user.address': address } });
+        const postuser = await feed_1.default.updateOne({ 'createdByUser.user._id': id }, { $set: { 'createdByUser.user.info': info, 'createdByUser.user.address': address } });
         const user = await index_1.default.findById(id);
         if (!user) {
             return res.status(422).json({ error: 'Usuário não encontrado' });

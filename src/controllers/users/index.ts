@@ -94,7 +94,9 @@ router.patch('/user/update-by-id/:id', async (req: Request, res: Response) => {
 
   try {
     const updateUser = await Users.updateOne({ _id: id }, req.body);
-
+    const member = await Group.updateOne({ 'members.user._id': id }, { $set: { 'members.$.user.info': info, 'members.$.user.address': address } });
+    const createduser = await Group.updateOne({ 'createdByUser.user._id': id }, { $set: { 'createdByUser.user.info': info, 'createdByUser.user.address': address } });
+    const postuser = await Post.updateOne({ 'createdByUser.user._id': id }, { $set: { 'createdByUser.user.info': info, 'createdByUser.user.address': address } });
     const user = await Users.findById(id);
     if (!user) {
       return res.status(422).json({ error: 'Usuário não encontrado' });
@@ -118,6 +120,7 @@ router.patch('/user/update-by-id/:id', async (req: Request, res: Response) => {
       },
       { arrayFilters: [{ 'elem.user._id': new mongoose.Types.ObjectId(id) }] }
     );
+
 
     return res.status(200).json({
       message: 'Dados atualizados com sucesso!',
