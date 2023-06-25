@@ -101,7 +101,6 @@ router.patch('/user/update-by-id/:id', async (req: Request, res: Response) => {
     if (!user) {
       return res.status(422).json({ error: 'Usuário não encontrado' });
     }
-
     const updatedPosts = await Post.updateMany(
       { 'comments.user._id': new mongoose.Types.ObjectId(id) },
       {

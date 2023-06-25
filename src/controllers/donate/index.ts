@@ -82,13 +82,13 @@ router.post('/donation/:userId?', async (req: Request, res: Response) => {
     }
 });
 
-router.get('/payment/status/:paymentId', async (req: Request, res: Response) => {
-    const paymentId = parseInt(req.params.paymentId);
+router.get('/donation/status/:donationId', async (req: Request, res: Response) => {
+    const donationId = parseInt(req.params.donationId);
     try {
         mercadopago.configure({
             access_token: process.env.access_token_prd as string
         });
-        const payment = await mercadopago.payment.get(paymentId);
+        const payment = await mercadopago.payment.get(donationId);
         res.status(200).send(payment);
     } catch (error) {
         console.error(error);
