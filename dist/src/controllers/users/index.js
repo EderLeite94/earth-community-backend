@@ -5,16 +5,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const index_1 = __importDefault(require("../../models/users/index"));
+const index_2 = require("../../utils/nickname/index");
+const index_3 = require("../../validations/users/index");
+const date_1 = require("../../utils/date");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const index_2 = require("../../validations/users/index");
 const group_1 = __importDefault(require("../../models/group"));
-const index_3 = require("../users/nickname/index");
 const feed_1 = __importDefault(require("../../models/feed"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const router = express_1.default.Router();
 //register
-router.post('/auth/user/sign-up', index_2.validateSignUp, async (req, res, next) => {
+router.post('/auth/user/sign-up', index_3.validateSignUp, async (req, res, next) => {
     try {
         const { info, security } = req.body;
         const { firstName, surname, email } = info;
@@ -23,9 +24,7 @@ router.post('/auth/user/sign-up', index_2.validateSignUp, async (req, res, next)
         const salt = await bcrypt_1.default.genSalt(12);
         const passwordHash = await bcrypt_1.default.hash(password, salt);
         // Generate a unique nickname
-        const nickname = await (0, index_3.generateUniqueNickname)(firstName, surname);
-        // Get current date/time in Brazil timezone
-        const now = new Date(new Date().getTime() - (3 * 60 * 60 * 1000));
+        const nickname = await (0, index_2.generateUniqueNickname)(firstName, surname);
         const users = {
             info: {
                 firstName,
@@ -36,7 +35,7 @@ router.post('/auth/user/sign-up', index_2.validateSignUp, async (req, res, next)
             security: {
                 authWith,
                 password: passwordHash,
-                accountCreateDate: now
+                accountCreateDate: date_1.now
             }
         };
         // Insert user in database
@@ -53,7 +52,7 @@ router.post('/auth/user/sign-up', index_2.validateSignUp, async (req, res, next)
     }
 });
 //Login users
-router.post('/auth/user/sign-in', index_2.validateSignIn, async (req, res) => {
+router.post('/auth/user/sign-in', index_3.validateSignIn, async (req, res) => {
     const { info, security } = req.body;
     const { email } = info;
     const { password } = security;

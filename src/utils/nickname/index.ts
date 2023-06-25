@@ -1,4 +1,4 @@
-import Users, { IUsers } from '../../../models/users/index';
+import Users, { IUsers } from '../../models/users/index';
 
 const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 

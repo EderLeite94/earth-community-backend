@@ -1,11 +1,13 @@
 import express, { Request, Response } from 'express';
-import Post from '../../models/feed/index';
 import { IFeed } from '../../models/feed/index';
+import { now } from '../../utils/date';
+import * as path from 'path';
+import Post from '../../models/feed/index';
 import Image from '../../models/feed/index'
 import Users from '../../models/users/index';
-import * as path from 'path';
 import mongoose from 'mongoose';
 import Group from '../../models/group';
+
 const router = express.Router();
 
 // Create post
@@ -13,9 +15,6 @@ router.post('/post/create/:id/:groupID', async (req: Request, res: Response) => 
     const id: string = req.params.id;
     const groupID: string = req.params.groupID;
     const { text, image } = req.body;
-    // Date Brazil
-    const data = new Date();
-    const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
     const user = await Users.findOne({ _id: id })
     if (!user) {
         return res.status(422).json({ error: 'Usuário não encontrado!' });

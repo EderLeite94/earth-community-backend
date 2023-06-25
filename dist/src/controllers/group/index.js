@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const index_1 = __importDefault(require("../../models/group/index"));
+const date_1 = require("../../utils/date");
 const index_2 = __importDefault(require("../../models/users/index"));
 const router = express_1.default.Router();
 // Create post
@@ -12,9 +13,6 @@ router.post('/group/create/:id', async (req, res) => {
     const id = req.params.id;
     const { name, image, description, category, headOffice } = req.body;
     const { city, state } = headOffice;
-    // Date Brazil
-    const data = new Date();
-    const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
     const user = await index_2.default.findById(id);
     if (!user) {
         return res.status(422).json({ error: 'Usuário não encontrado!' });
@@ -30,7 +28,7 @@ router.post('/group/create/:id', async (req, res) => {
             _id: user._id,
             user: user
         },
-        createdAt: now
+        createdAt: date_1.now
     };
     if (!name) {
         return res.status(422).json({ error: 'Preencha um nome!' });
