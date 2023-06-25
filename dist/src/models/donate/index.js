@@ -28,6 +28,7 @@ const DonateSchema = new mongoose_1.Schema({
     trnansaction_id: { type: Number },
     transaction_amount: { type: String },
     description: { type: String },
+    category: { type: String },
     payment_method_id: { type: String },
     payer: {
         user_id: { type: String },

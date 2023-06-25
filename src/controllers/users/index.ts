@@ -1,11 +1,11 @@
 import express, { Request, Response, NextFunction } from 'express';
 import Users, { IUsers } from '../../models/users/index';
-import bcrypt from 'bcrypt';
-import moment from 'moment';
-import jwt from 'jsonwebtoken';
+import { generateUniqueNickname } from '../../utils/nickname/index';
 import { validateSignUp, validateSignIn } from '../../validations/users/index';
+import { now } from '../../utils/date';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import Group from '../../models/group';
-import { generateUniqueNickname } from '../users/nickname/index';
 import Post from '../../models/feed';
 import mongoose from 'mongoose';
 const router = express.Router();
@@ -23,9 +23,6 @@ router.post('/auth/user/sign-up', validateSignUp, async (req: Request, res: Resp
     // Generate a unique nickname
     const nickname = await generateUniqueNickname(firstName, surname);
 
-    // Get current date/time in Brazil timezone
-    const now = new Date(new Date().getTime() - (3 * 60 * 60 * 1000));
-
     const users = {
       info: {
         firstName,
@@ -39,7 +36,6 @@ router.post('/auth/user/sign-up', validateSignUp, async (req: Request, res: Resp
         accountCreateDate: now
       }
     };
-
     // Insert user in database
     await Users.create(users);
     const user: IUsers | null = await Users.findOne({ 'info.email': email });

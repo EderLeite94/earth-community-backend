@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
-import mongoose from 'mongoose';
 import Group, { GroupsDocument } from '../../models/group/index';
+import { now } from '../../utils/date';
+import mongoose from 'mongoose';
 import Users from '../../models/users/index';
 
 const router = express.Router();
@@ -10,9 +11,6 @@ router.post('/group/create/:id', async (req: Request, res: Response) => {
   const id: string = req.params.id;
   const { name, image, description, category, headOffice } = req.body;
   const { city, state } = headOffice
-  // Date Brazil
-  const data = new Date();
-  const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
   const user = await Users.findById(id)
   if (!user) {
     return res.status(422).json({ error: 'Usuário não encontrado!' });
@@ -121,7 +119,6 @@ router.get('/group/get-by-id/:id', async (req: Request, res: Response) => {
 });
 router.post('/group/add-member/:id/:userId', async (req: Request, res: Response) => {
   const { id, userId } = req.params;
-
   try {
     const user = await Users.findById(userId);
     if (!user) {
