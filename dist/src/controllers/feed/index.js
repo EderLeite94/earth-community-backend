@@ -23,6 +23,7 @@ router.post('/post/create/:id/:groupID', async (req, res) => {
     if (!group) {
         return res.status(400).send({ error: 'Grupo não encontrado!' });
     }
+    const usergroup = group.createdByUser.user;
     const post = {
         text,
         image,
@@ -31,7 +32,10 @@ router.post('/post/create/:id/:groupID', async (req, res) => {
             user: user
         },
         createdAt: date_1.now,
-        createdByGroup: group
+        createdByGroup: {
+            group: group,
+            createdByUser: usergroup
+        }
     };
     if (!text) {
         return res.status(400).send({ error: 'Insira um texto!' });

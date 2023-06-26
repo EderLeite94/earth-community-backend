@@ -27,7 +27,6 @@ router.post('/achievement/:id', async (req, res) => {
             { completed: childrenadolescents.completed },
             { completed: humanrights.completed },
             { completed: education.completed },
-            { completed: education.completed },
             { completed: sports.completed },
             { completed: environment.completed },
             { completed: petInfo.completed },
