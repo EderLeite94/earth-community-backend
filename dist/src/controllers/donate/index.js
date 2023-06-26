@@ -10,7 +10,7 @@ const index_2 = __importDefault(require("../../models/donate/index"));
 const router = express_1.default.Router();
 router.post('/donation/:userId?', async (req, res) => {
     const userId = req.params.userId;
-    const { transaction_amount, description, category, payer, address } = req.body;
+    const { transaction_amount, description, payer, address } = req.body;
     const { email, first_name, last_name } = payer;
     const { zip_code, street_name, street_number, neighborhood, city, federal_unit, type, number } = address;
     try {
@@ -52,7 +52,6 @@ router.post('/donation/:userId?', async (req, res) => {
             transaction_id: payment.body.id,
             transaction_amount,
             description,
-            category,
             payment_method_id: "pix",
             payer: {
                 user_id: userId || null,
