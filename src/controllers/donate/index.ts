@@ -89,7 +89,7 @@ router.get('/donation/get-by-id/:donationId', async (req: Request, res: Response
             access_token: process.env.access_token_prd as string
         });
         const payment = await mercadopago.payment.get(donationId);
-        res.status(200).send(payment);
+        res.status(200).send({ donation: payment });
     } catch (error) {
         console.error(error);
         res.status(500).send(error);
@@ -103,7 +103,7 @@ router.get('/donation/get-by-user-id/:userId', async (req, res) => {
         const user = await Users.findById(userId);
 
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(404).json({ error: 'Usuário não encontrado' });
         }
 
         const donationIds = user.donationIds;
@@ -123,9 +123,7 @@ router.get('/donation/get-by-user-id/:userId', async (req, res) => {
                 donations.push({ error: `Error retrieving payment for donation ID ${donationId}` });
             }
         }
-        if (donations.length === 0) {
-            return res.json({ error: 'Usuário não efetuou doação!' });
-        }
+
         res.json({ donations });
     } catch (error) {
         console.error(error);

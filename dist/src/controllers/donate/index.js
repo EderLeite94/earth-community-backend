@@ -82,26 +82,26 @@ router.post('/donation/:userId?', async (req, res) => {
         res.status(500).send(error);
     }
 });
-router.get('/donation/status/:donationId', async (req, res) => {
+router.get('/donation/get-by-id/:donationId', async (req, res) => {
     const donationId = parseInt(req.params.donationId);
     try {
         mercadopago_1.default.configure({
             access_token: process.env.access_token_prd
         });
         const payment = await mercadopago_1.default.payment.get(donationId);
-        res.status(200).send(payment);
+        res.status(200).send({ donation: payment });
     }
     catch (error) {
         console.error(error);
         res.status(500).send(error);
     }
 });
-router.get('/get-all-donation/status/:userId/', async (req, res) => {
+router.get('/donation/get-by-user-id/:userId', async (req, res) => {
     const userId = req.params.userId;
     try {
         const user = await index_1.default.findById(userId);
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(404).json({ error: 'Usuário não encontrado' });
         }
         const donationIds = user.donationIds;
         const donations = [];
@@ -118,9 +118,6 @@ router.get('/get-all-donation/status/:userId/', async (req, res) => {
                 console.error(`Error retrieving payment for donation ID ${donationId}:`, error);
                 donations.push({ error: `Error retrieving payment for donation ID ${donationId}` });
             }
-        }
-        if (donations.length === 0) {
-            return res.json({ error: 'Usuário não efetuou doação!' });
         }
         res.json({ donations });
     }
