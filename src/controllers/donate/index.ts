@@ -82,7 +82,7 @@ router.post('/donation/:userId?', async (req: Request, res: Response) => {
     }
 });
 
-router.get('/donation/status/:donationId', async (req: Request, res: Response) => {
+router.get('/donation/get-by-id/:donationId', async (req: Request, res: Response) => {
     const donationId = parseInt(req.params.donationId);
     try {
         mercadopago.configure({
@@ -95,7 +95,8 @@ router.get('/donation/status/:donationId', async (req: Request, res: Response) =
         res.status(500).send(error);
     }
 });
-router.get('/get-all-donation/status/:userId/', async (req, res) => {
+
+router.get('/donation/get-by-user-id/:userId', async (req, res) => {
     const userId = req.params.userId;
 
     try {
