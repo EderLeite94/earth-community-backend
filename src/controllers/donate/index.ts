@@ -95,5 +95,40 @@ router.get('/donation/status/:donationId', async (req: Request, res: Response) =
         res.status(500).send(error);
     }
 });
+router.get('/get-all-donation/status/:userId/', async (req, res) => {
+    const userId = req.params.userId;
 
+    try {
+        const user = await Users.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const donationIds = user.donationIds;
+        const donations = [];
+
+        // Configure o acesso ao MercadoPago
+        mercadopago.configure({
+            access_token: process.env.access_token_prd as string
+        });
+
+        for (const donationId of donationIds) {
+            try {
+                const payment = await mercadopago.payment.get(donationId);
+                donations.push(payment);
+            } catch (error) {
+                console.error(`Error retrieving payment for donation ID ${donationId}:`, error);
+                donations.push({ error: `Error retrieving payment for donation ID ${donationId}` });
+            }
+        }
+        if (donations.length === 0) {
+            return res.json({ error: 'Usuário não efetuou doação!' });
+        }
+        res.json({ donations });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 export default router;
