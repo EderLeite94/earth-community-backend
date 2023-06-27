@@ -33,8 +33,10 @@ router.post('/post/create/:id/:groupID', async (req, res) => {
         },
         createdAt: date_1.now,
         createdByGroup: {
-            group: group,
-            createdByUser: usergroup
+            group: {
+                info: group,
+                createdByUser: usergroup
+            },
         }
     };
     if (!text) {
