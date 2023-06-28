@@ -35,7 +35,15 @@ router.post('/post/create/:id/:groupID', async (req: Request, res: Response) => 
         createdAt: now,
         createdByGroup: {
             group: {
-                info: group,
+                _id: group._id,
+                name: group.name,
+                image: group.image,
+                description: group.description,
+                category: group.category,
+                headOffice: {
+                    city: group.headOffice.city,
+                    state: group.headOffice.state
+                },
                 createdByUser: usergroup
             },
         }

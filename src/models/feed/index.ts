@@ -168,16 +168,14 @@ const FeedSchema: Schema = new Schema({
     },
     createdByGroup: {
         group: {
-            info: {
-                _id: { type: Schema.Types.ObjectId, ref: 'Group' },
-                name: { type: String },
-                image: { type: String },
-                description: { type: String },
-                category: { type: String },
-                headOffice: {
-                    city: { type: String },
-                    state: { type: String },
-                }
+            _id: { type: Schema.Types.ObjectId, ref: 'Group' },
+            name: { type: String },
+            image: { type: String },
+            description: { type: String },
+            category: { type: String },
+            headOffice: {
+                city: { type: String },
+                state: { type: String },
             },
             createdByUser: {
                 _id: { type: Schema.Types.ObjectId, ref: 'User' },
