@@ -59,16 +59,14 @@ const FeedSchema = new mongoose_1.Schema({
     },
     createdByGroup: {
         group: {
-            info: {
-                _id: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Group' },
-                name: { type: String },
-                image: { type: String },
-                description: { type: String },
-                category: { type: String },
-                headOffice: {
-                    city: { type: String },
-                    state: { type: String },
-                }
+            _id: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Group' },
+            name: { type: String },
+            image: { type: String },
+            description: { type: String },
+            category: { type: String },
+            headOffice: {
+                city: { type: String },
+                state: { type: String },
             },
             createdByUser: {
                 _id: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' },
