@@ -49,7 +49,7 @@ router.post('/donation/:userId?', async (req: Request, res: Response) => {
         };
         const payment = await mercadopago.payment.create(payment_data);
         const donate = {
-            transaction_id: payment.body.id,
+            transactionID: payment.body.id,
             transaction_amount,
             description,
             payment_method_id: "pix",
@@ -76,7 +76,7 @@ router.post('/donation/:userId?', async (req: Request, res: Response) => {
         if (userId) {
             await Users.findByIdAndUpdate(userId, { $push: { donationIds: payment.body.id } });
         }
-        res.status(200).send(payment);
+        res.status(200).send(donate);
     } catch (error) {
         res.status(500).send(error);
     }
@@ -98,6 +98,9 @@ router.get('/donation/get-by-id/:donationId', async (req: Request, res: Response
 
 router.get('/donation/get-by-user-id/:userId', async (req, res) => {
     const userId = req.params.userId;
+    const { page, perPage } = req.query;
+    const pageNumber = parseInt(page as string) || 1;
+    const itemsPerPage = parseInt(perPage as string) || 10;
 
     try {
         const user = await Users.findById(userId);
@@ -107,6 +110,10 @@ router.get('/donation/get-by-user-id/:userId', async (req, res) => {
         }
 
         const donationIds = user.donationIds;
+        const totalPages = Math.ceil(donationIds.length / itemsPerPage);
+        const startIndex = (pageNumber - 1) * itemsPerPage;
+        const endIndex = pageNumber * itemsPerPage;
+
         const donations = [];
 
         // Configure o acesso ao MercadoPago
@@ -114,7 +121,7 @@ router.get('/donation/get-by-user-id/:userId', async (req, res) => {
             access_token: process.env.access_token_prd as string
         });
 
-        for (const donationId of donationIds) {
+        for (const donationId of donationIds.slice(startIndex, endIndex)) {
             try {
                 const payment = await mercadopago.payment.get(donationId);
                 donations.push(payment);
@@ -124,10 +131,71 @@ router.get('/donation/get-by-user-id/:userId', async (req, res) => {
             }
         }
 
-        res.json({ donations });
+        res.json({
+            donations,
+            page: pageNumber,
+            perPage: itemsPerPage,
+            totalPages,
+            totalData: donationIds.length
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+router.get('/donation/get-all', async (req, res) => {
+    const { page, perPage } = req.query;
+    const pageNumber = parseInt(page as string) || 1;
+    const itemsPerPage = parseInt(perPage as string) || 10;
+
+    try {
+        const donations = await Donate.find();
+        const donationIds = donations.map(donation => donation.transactionID);
+        const totalData = donationIds.length;
+        const totalPages = Math.ceil(totalData / itemsPerPage);
+        const startIndex = (pageNumber - 1) * itemsPerPage;
+        const endIndex = pageNumber * itemsPerPage;
+
+        if (totalData === 0) {
+            return res.json({
+                donations: [],
+                page: pageNumber,
+                perPage: itemsPerPage,
+                totalPages,
+                totalData
+            });
+        }
+
+        // Configure o acesso ao MercadoPago
+        mercadopago.configure({
+            access_token: process.env.access_token_prd as string
+        });
+
+        const donationPromises = donationIds
+            .slice(startIndex, endIndex)
+            .map(async donationId => {
+                try {
+                    const payment = await mercadopago.payment.get(donationId);
+                    return payment;
+                } catch (error) {
+                    console.error(`Error retrieving payment for donation ID ${donationId}:`, error);
+                    return { error: `Error retrieving payment for donation ID ${donationId}` };
+                }
+            });
+
+        const donationsResult = await Promise.all(donationPromises);
+
+        res.json({
+            donations: donationsResult,
+            page: pageNumber,
+            perPage: itemsPerPage,
+            totalPages,
+            totalData
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 export default router;
