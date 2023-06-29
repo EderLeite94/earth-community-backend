@@ -141,7 +141,7 @@ router.get('/post/get-group-by-id/:id', async (req: Request, res: Response) => {
         const totalData = await Post.countDocuments({ 'createdByGroup._id': id });
         const totalPages = Math.ceil(totalData / perPage);
 
-        const posts = await Post.find({ 'createdByGroup._id': id })
+        const posts = await Post.find({ 'createdByGroup.group._id': id })
             .skip((page - 1) * perPage)
             .limit(perPage);
 
