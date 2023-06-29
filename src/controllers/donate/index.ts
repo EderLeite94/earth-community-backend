@@ -76,7 +76,7 @@ router.post('/donation/:userId?', async (req: Request, res: Response) => {
         if (userId) {
             await Users.findByIdAndUpdate(userId, { $push: { donationIds: payment.body.id } });
         }
-        res.status(200).send(donate);
+        res.status(200).send(payment);
     } catch (error) {
         res.status(500).send(error);
     }
