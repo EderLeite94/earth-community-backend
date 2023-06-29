@@ -138,13 +138,12 @@ router.get('/donation/get-by-user-id/:userId', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-router.get('/donation/getall', async (req, res) => {
+router.get('/donation/get-all', async (req, res) => {
     const { page, perPage } = req.query;
     const pageNumber = parseInt(page) || 1;
     const itemsPerPage = parseInt(perPage) || 10;
     try {
         const donations = await index_2.default.find();
-        console.log(donations);
         const donationIds = donations.map(donation => donation.transactionID);
         const totalData = donationIds.length;
         const totalPages = Math.ceil(totalData / itemsPerPage);
