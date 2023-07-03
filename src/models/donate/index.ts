@@ -14,15 +14,15 @@ export interface IDonate {
         identification: {
             type: string,
             number: number
+        },
+        address: {
+            zip_code: number,
+            street_name: string,
+            street_number: string,
+            neighborhood: string,
+            city: string,
+            federal_unit: string
         }
-    },
-    address: {
-        zip_code: number,
-        street_name: string,
-        street_number: string,
-        neighborhood: string,
-        city: string,
-        federal_unit: string
     }
 }
 
@@ -41,15 +41,15 @@ const DonateSchema: Schema = new Schema({
         identification: {
             type: { type: String },
             number: { type: Number },
+        },
+        address: {
+            zip_code: { type: Number },
+            street_name: { type: String },
+            street_number: { type: String },
+            neighborhood: { type: String },
+            city: { type: String },
+            federal_unit: { type: String }
         }
-    },
-    address: {
-        zip_code: { type: Number },
-        street_name: { type: String },
-        street_number: { type: String },
-        neighborhood: { type: String },
-        city: { type: String },
-        federal_unit: { type: String }
     }
 });
 export interface IDonateithId extends IDonate {

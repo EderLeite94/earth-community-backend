@@ -11,8 +11,8 @@ const router = express_1.default.Router();
 router.post('/donation/:userId?', async (req, res) => {
     const userId = req.params.userId;
     const { transaction_amount, description, payer, address } = req.body;
-    const { email, first_name, last_name } = payer;
-    const { zip_code, street_name, street_number, neighborhood, city, federal_unit, type, number } = address;
+    const { email, first_name, last_name, identification, type, number } = payer;
+    const { zip_code, street_name, street_number, neighborhood, city, federal_unit } = address;
     try {
         if (userId) {
             const user = await index_1.default.findById(userId);
@@ -33,7 +33,7 @@ router.post('/donation/:userId?', async (req, res) => {
                 last_name,
                 identification: {
                     type,
-                    number
+                    number,
                 },
                 address: {
                     zip_code,
@@ -59,8 +59,8 @@ router.post('/donation/:userId?', async (req, res) => {
                 first_name,
                 last_name,
                 identification: {
-                    type,
-                    number
+                    type: identification.type,
+                    number: identification.number,
                 },
                 address: {
                     zip_code,
@@ -167,7 +167,6 @@ router.get('/donation/get-all', async (req, res) => {
             access_token: process.env.access_token_prd
         });
         const donationPromises = donationIds
-            .slice(startIndex, endIndex)
             .map(async (donationId) => {
             try {
                 const payment = await mercadopago_1.default.payment.get(donationId);
@@ -183,9 +182,16 @@ router.get('/donation/get-all', async (req, res) => {
                 return { error: `Error retrieving payment for donation ID ${donationId}` };
             }
         });
-        const donationsResult = await Promise.all(donationPromises);
+        let donationsResult = await Promise.all(donationPromises);
+        donationsResult = donationsResult.filter(donationResult => {
+            if ('status' in donationResult) {
+                return donationResult.body.status === 'approved';
+            }
+            return false;
+        });
+        const slicedDonations = donationsResult.slice(startIndex, endIndex);
         res.json({
-            donations: donationsResult,
+            donations: slicedDonations,
             page: pageNumber,
             perPage: itemsPerPage,
             totalPages,

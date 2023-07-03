@@ -8,8 +8,8 @@ const router = express.Router();
 router.post('/donation/:userId?', async (req: Request, res: Response) => {
     const userId = req.params.userId;
     const { transaction_amount, description, payer, address } = req.body;
-    const { email, first_name, last_name } = payer;
-    const { zip_code, street_name, street_number, neighborhood, city, federal_unit, type, number } = address;
+    const { email, first_name, last_name, identification, type, number } = payer;
+    const { zip_code, street_name, street_number, neighborhood, city, federal_unit } = address;
     try {
 
         if (userId) {
@@ -33,7 +33,7 @@ router.post('/donation/:userId?', async (req: Request, res: Response) => {
                 last_name,
                 identification: {
                     type,
-                    number
+                    number,
                 },
                 address: {
                     zip_code,
@@ -59,8 +59,8 @@ router.post('/donation/:userId?', async (req: Request, res: Response) => {
                 first_name,
                 last_name,
                 identification: {
-                    type,
-                    number
+                    type: identification.type,
+                    number: identification.number,
                 },
                 address: {
                     zip_code,
@@ -177,17 +177,14 @@ router.get('/donation/get-all', async (req, res) => {
         });
 
         const donationPromises = donationIds
-            .slice(startIndex, endIndex)
             .map(async donationId => {
                 try {
                     const payment = await mercadopago.payment.get(donationId);
                     const infoPayer = await Donate.findOne({ transactionID: donationId });
-
                     if (!infoPayer) {
                         console.error(`Information for donation ID ${donationId} not found.`);
                         return { error: `Information for donation ID ${donationId} not found.` };
                     }
-
                     return {
                         ...payment,
                         infoPayer
@@ -198,10 +195,18 @@ router.get('/donation/get-all', async (req, res) => {
                 }
             });
 
-        const donationsResult = await Promise.all(donationPromises);
+        let donationsResult = await Promise.all(donationPromises);
+        donationsResult = donationsResult.filter(donationResult => {
+            if ('status' in donationResult) {
+                return donationResult.body.status === 'approved';
+            }
+            return false;
+        });
+
+        const slicedDonations = donationsResult.slice(startIndex, endIndex);
 
         res.json({
-            donations: donationsResult,
+            donations: slicedDonations,
             page: pageNumber,
             perPage: itemsPerPage,
             totalPages,
@@ -212,6 +217,5 @@ router.get('/donation/get-all', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
 
 export default router;

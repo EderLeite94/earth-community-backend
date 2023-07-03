@@ -37,15 +37,15 @@ const DonateSchema = new mongoose_1.Schema({
         identification: {
             type: { type: String },
             number: { type: Number },
+        },
+        address: {
+            zip_code: { type: Number },
+            street_name: { type: String },
+            street_number: { type: String },
+            neighborhood: { type: String },
+            city: { type: String },
+            federal_unit: { type: String }
         }
-    },
-    address: {
-        zip_code: { type: Number },
-        street_name: { type: String },
-        street_number: { type: String },
-        neighborhood: { type: String },
-        city: { type: String },
-        federal_unit: { type: String }
     }
 });
 const Donate = mongoose_1.default.model('Donate', DonateSchema);
