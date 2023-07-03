@@ -76,7 +76,7 @@ router.post('/donation/:userId?', async (req, res) => {
         if (userId) {
             await index_1.default.findByIdAndUpdate(userId, { $push: { donationIds: payment.body.id } });
         }
-        res.status(200).send(donate);
+        res.status(200).send(payment);
     }
     catch (error) {
         res.status(500).send(error);
@@ -84,12 +84,16 @@ router.post('/donation/:userId?', async (req, res) => {
 });
 router.get('/donation/get-by-id/:donationId', async (req, res) => {
     const donationId = parseInt(req.params.donationId);
+    const infoPayer = await index_2.default.findOne({ transactionID: donationId });
+    if (!infoPayer) {
+        return res.status(404).send({ error: 'Doação não encontrada' });
+    }
     try {
         mercadopago_1.default.configure({
             access_token: process.env.access_token_prd
         });
         const payment = await mercadopago_1.default.payment.get(donationId);
-        res.status(200).send({ donation: payment });
+        res.status(200).send({ donation: payment, infoPayer });
     }
     catch (error) {
         console.error(error);
@@ -167,7 +171,12 @@ router.get('/donation/get-all', async (req, res) => {
             .map(async (donationId) => {
             try {
                 const payment = await mercadopago_1.default.payment.get(donationId);
-                return payment;
+                const infoPayer = await index_2.default.findOne({ transactionID: donationId });
+                if (!infoPayer) {
+                    console.error(`Information for donation ID ${donationId} not found.`);
+                    return { error: `Information for donation ID ${donationId} not found.` };
+                }
+                return Object.assign(Object.assign({}, payment), { infoPayer });
             }
             catch (error) {
                 console.error(`Error retrieving payment for donation ID ${donationId}:`, error);

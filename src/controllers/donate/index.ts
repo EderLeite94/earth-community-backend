@@ -84,12 +84,17 @@ router.post('/donation/:userId?', async (req: Request, res: Response) => {
 
 router.get('/donation/get-by-id/:donationId', async (req: Request, res: Response) => {
     const donationId = parseInt(req.params.donationId);
+    const infoPayer = await Donate.findOne({ transactionID: donationId })
+    if (!infoPayer) {
+        return res.status(404).send({ error: 'Doação não encontrada' });
+    }
     try {
         mercadopago.configure({
             access_token: process.env.access_token_prd as string
         });
         const payment = await mercadopago.payment.get(donationId);
-        res.status(200).send({ donation: payment });
+
+        res.status(200).send({ donation: payment, infoPayer });
     } catch (error) {
         console.error(error);
         res.status(500).send(error);
@@ -176,7 +181,17 @@ router.get('/donation/get-all', async (req, res) => {
             .map(async donationId => {
                 try {
                     const payment = await mercadopago.payment.get(donationId);
-                    return payment;
+                    const infoPayer = await Donate.findOne({ transactionID: donationId });
+
+                    if (!infoPayer) {
+                        console.error(`Information for donation ID ${donationId} not found.`);
+                        return { error: `Information for donation ID ${donationId} not found.` };
+                    }
+
+                    return {
+                        ...payment,
+                        infoPayer
+                    };
                 } catch (error) {
                     console.error(`Error retrieving payment for donation ID ${donationId}:`, error);
                     return { error: `Error retrieving payment for donation ID ${donationId}` };
@@ -197,5 +212,6 @@ router.get('/donation/get-all', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
 
 export default router;
