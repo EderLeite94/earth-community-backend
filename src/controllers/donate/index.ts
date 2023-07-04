@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import Users from '../../models/users/index';
 import mercadopago from 'mercadopago';
 import Donate from '../../models/donate/index';
+import { formatCpf }from '../../utils/hidden_cpf/index';
 
 const router = express.Router();
 
@@ -84,22 +85,37 @@ router.post('/donation/:userId?', async (req: Request, res: Response) => {
 
 router.get('/donation/get-by-id/:donationId', async (req: Request, res: Response) => {
     const donationId = parseInt(req.params.donationId);
-    const infoPayer = await Donate.findOne({ transactionID: donationId })
+    const infoPayer = await Donate.findOne({ transactionID: donationId });
+  
     if (!infoPayer) {
-        return res.status(404).send({ error: 'Doação não encontrada' });
+      return res.status(404).send({ error: 'Doação não encontrada' });
     }
+  
     try {
-        mercadopago.configure({
-            access_token: process.env.access_token_prd as string
-        });
-        const payment = await mercadopago.payment.get(donationId);
+      mercadopago.configure({
+        access_token: process.env.access_token_prd as string
+      });
+  
+      const payment = await mercadopago.payment.get(donationId);
+      const { number, ...identificationWithoutNumber } = infoPayer.payer.identification;
 
-        res.status(200).send({ donation: payment, infoPayer });
+    const formattedInfoPayer = {
+      ...infoPayer.toObject(),
+      payer: {
+        ...infoPayer.payer,
+        identification: {
+          ...identificationWithoutNumber,
+          partialCPF: formatCpf(infoPayer.payer.identification.number)
+        }
+      }
+    };
+  
+      res.status(200).send({ donation: payment, infoPayer: formattedInfoPayer });
     } catch (error) {
-        console.error(error);
-        res.status(500).send(error);
+      console.error(error);
+      res.status(500).send(error);
     }
-});
+  });
 
 router.get('/donation/get-by-user-id/:userId', async (req, res) => {
     const userId = req.params.userId;
@@ -148,74 +164,90 @@ router.get('/donation/get-by-user-id/:userId', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-router.get('/donation/get-all', async (req, res) => {
+router.get('/donation/get-all', async (req: Request, res: Response) => {
     const { page, perPage } = req.query;
     const pageNumber = parseInt(page as string) || 1;
     const itemsPerPage = parseInt(perPage as string) || 10;
-
+  
     try {
-        const donations = await Donate.find();
-        const donationIds = donations.map(donation => donation.transactionID);
-        const totalData = donationIds.length;
-        const totalPages = Math.ceil(totalData / itemsPerPage);
-        const startIndex = (pageNumber - 1) * itemsPerPage;
-        const endIndex = pageNumber * itemsPerPage;
-
-        if (totalData === 0) {
-            return res.json({
-                donations: [],
-                page: pageNumber,
-                perPage: itemsPerPage,
-                totalPages,
-                totalData
-            });
+      const donations = await Donate.find();
+      const donationIds = donations.map((donation) => donation.transactionID);
+      const totalData = donationIds.length;
+      const totalPages = Math.ceil(totalData / itemsPerPage);
+      const startIndex = (pageNumber - 1) * itemsPerPage;
+      const endIndex = pageNumber * itemsPerPage;
+  
+      if (totalData === 0) {
+        return res.json({
+          donations: [],
+          page: pageNumber,
+          perPage: itemsPerPage,
+          totalPages,
+          totalData,
+        });
+      }
+  
+      // Configure access to MercadoPago
+      mercadopago.configure({
+        access_token: process.env.access_token_prd as string,
+      });
+  
+      const donationPromises = donationIds.map(async (donationId) => {
+        try {
+          const payment = await mercadopago.payment.get(donationId);
+          const infoPayer = await Donate.findOne({ transactionID: donationId });
+  
+          if (!infoPayer) {
+            console.error(`Information for donation ID ${donationId} not found.`);
+            return { error: `Information for donation ID ${donationId} not found.` };
+          }
+  
+          
+          const { number, ...identificationWithoutNumber } = infoPayer.payer.identification;
+  
+          // Format CPF number
+          const formattedInfoPayer = {
+            ...infoPayer.toObject(),
+            payer: {
+              ...infoPayer.payer,
+              identification: {
+                ...identificationWithoutNumber,
+                partialCPF: formatCpf(infoPayer.payer.identification.number),
+              },
+            },
+          };
+  
+          return {
+            ...payment,
+            infoPayer: formattedInfoPayer,
+          };
+        } catch (error) {
+          console.error(`Error retrieving payment for donation ID ${donationId}:`, error);
+          return { error: `Error retrieving payment for donation ID ${donationId}` };
         }
-
-        // Configure o acesso ao MercadoPago
-        mercadopago.configure({
-            access_token: process.env.access_token_prd as string
-        });
-
-        const donationPromises = donationIds
-            .map(async donationId => {
-                try {
-                    const payment = await mercadopago.payment.get(donationId);
-                    const infoPayer = await Donate.findOne({ transactionID: donationId });
-                    if (!infoPayer) {
-                        console.error(`Information for donation ID ${donationId} not found.`);
-                        return { error: `Information for donation ID ${donationId} not found.` };
-                    }
-                    return {
-                        ...payment,
-                        infoPayer
-                    };
-                } catch (error) {
-                    console.error(`Error retrieving payment for donation ID ${donationId}:`, error);
-                    return { error: `Error retrieving payment for donation ID ${donationId}` };
-                }
-            });
-
-        let donationsResult = await Promise.all(donationPromises);
-        donationsResult = donationsResult.filter(donationResult => {
-            if ('status' in donationResult) {
-                return donationResult.body.status === 'approved';
-            }
-            return false;
-        });
-
-        const slicedDonations = donationsResult.slice(startIndex, endIndex);
-
-        res.json({
-            donations: slicedDonations,
-            page: pageNumber,
-            perPage: itemsPerPage,
-            totalPages,
-            totalData
-        });
+      });
+  
+      let donationsResult = await Promise.all(donationPromises);
+      donationsResult = donationsResult.filter((donationResult) => {
+        if ('status' in donationResult) {
+          return donationResult.body.status === 'approved';
+        }
+        return false;
+      });
+  
+      const slicedDonations = donationsResult.slice(startIndex, endIndex);
+  
+      res.json({
+        donations: slicedDonations,
+        page: pageNumber,
+        perPage: itemsPerPage,
+        totalPages,
+        totalData,
+      });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
     }
-});
+  });
 
 export default router;

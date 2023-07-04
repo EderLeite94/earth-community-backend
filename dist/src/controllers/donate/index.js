@@ -1,4 +1,15 @@
 "use strict";
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -7,6 +18,7 @@ const express_1 = __importDefault(require("express"));
 const index_1 = __importDefault(require("../../models/users/index"));
 const mercadopago_1 = __importDefault(require("mercadopago"));
 const index_2 = __importDefault(require("../../models/donate/index"));
+const index_3 = require("../../utils/hidden_cpf/index");
 const router = express_1.default.Router();
 router.post('/donation/:userId?', async (req, res) => {
     const userId = req.params.userId;
@@ -93,7 +105,9 @@ router.get('/donation/get-by-id/:donationId', async (req, res) => {
             access_token: process.env.access_token_prd
         });
         const payment = await mercadopago_1.default.payment.get(donationId);
-        res.status(200).send({ donation: payment, infoPayer });
+        const _a = infoPayer.payer.identification, { number } = _a, identificationWithoutNumber = __rest(_a, ["number"]);
+        const formattedInfoPayer = Object.assign(Object.assign({}, infoPayer.toObject()), { payer: Object.assign(Object.assign({}, infoPayer.payer), { identification: Object.assign(Object.assign({}, identificationWithoutNumber), { partialCPF: (0, index_3.formatCpf)(infoPayer.payer.identification.number) }) }) });
+        res.status(200).send({ donation: payment, infoPayer: formattedInfoPayer });
     }
     catch (error) {
         console.error(error);
@@ -148,7 +162,7 @@ router.get('/donation/get-all', async (req, res) => {
     const itemsPerPage = parseInt(perPage) || 10;
     try {
         const donations = await index_2.default.find();
-        const donationIds = donations.map(donation => donation.transactionID);
+        const donationIds = donations.map((donation) => donation.transactionID);
         const totalData = donationIds.length;
         const totalPages = Math.ceil(totalData / itemsPerPage);
         const startIndex = (pageNumber - 1) * itemsPerPage;
@@ -159,15 +173,14 @@ router.get('/donation/get-all', async (req, res) => {
                 page: pageNumber,
                 perPage: itemsPerPage,
                 totalPages,
-                totalData
+                totalData,
             });
         }
-        // Configure o acesso ao MercadoPago
+        // Configure access to MercadoPago
         mercadopago_1.default.configure({
-            access_token: process.env.access_token_prd
+            access_token: process.env.access_token_prd,
         });
-        const donationPromises = donationIds
-            .map(async (donationId) => {
+        const donationPromises = donationIds.map(async (donationId) => {
             try {
                 const payment = await mercadopago_1.default.payment.get(donationId);
                 const infoPayer = await index_2.default.findOne({ transactionID: donationId });
@@ -175,7 +188,11 @@ router.get('/donation/get-all', async (req, res) => {
                     console.error(`Information for donation ID ${donationId} not found.`);
                     return { error: `Information for donation ID ${donationId} not found.` };
                 }
-                return Object.assign(Object.assign({}, payment), { infoPayer });
+                // Exclude number property from identification
+                const _a = infoPayer.payer.identification, { number } = _a, identificationWithoutNumber = __rest(_a, ["number"]);
+                // Format CPF number
+                const formattedInfoPayer = Object.assign(Object.assign({}, infoPayer.toObject()), { payer: Object.assign(Object.assign({}, infoPayer.payer), { identification: Object.assign(Object.assign({}, identificationWithoutNumber), { partialCPF: (0, index_3.formatCpf)(infoPayer.payer.identification.number) }) }) });
+                return Object.assign(Object.assign({}, payment), { infoPayer: formattedInfoPayer });
             }
             catch (error) {
                 console.error(`Error retrieving payment for donation ID ${donationId}:`, error);
@@ -183,7 +200,7 @@ router.get('/donation/get-all', async (req, res) => {
             }
         });
         let donationsResult = await Promise.all(donationPromises);
-        donationsResult = donationsResult.filter(donationResult => {
+        donationsResult = donationsResult.filter((donationResult) => {
             if ('status' in donationResult) {
                 return donationResult.body.status === 'approved';
             }
@@ -195,7 +212,7 @@ router.get('/donation/get-all', async (req, res) => {
             page: pageNumber,
             perPage: itemsPerPage,
             totalPages,
-            totalData
+            totalData,
         });
     }
     catch (error) {
