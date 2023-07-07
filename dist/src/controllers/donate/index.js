@@ -18,6 +18,7 @@ const express_1 = __importDefault(require("express"));
 const index_1 = __importDefault(require("../../models/users/index"));
 const mercadopago_1 = __importDefault(require("mercadopago"));
 const index_2 = __importDefault(require("../../models/donate/index"));
+const date_1 = require("../../utils/date");
 const index_3 = require("../../utils/hidden_cpf/index");
 const router = express_1.default.Router();
 router.post('/donation/:userId?', async (req, res) => {
@@ -65,6 +66,7 @@ router.post('/donation/:userId?', async (req, res) => {
             transaction_amount,
             description,
             payment_method_id: "pix",
+            donateCreateDate: date_1.now,
             payer: {
                 user_id: userId || null,
                 email,
@@ -129,22 +131,52 @@ router.get('/donation/get-by-user-id/:userId', async (req, res) => {
         const startIndex = (pageNumber - 1) * itemsPerPage;
         const endIndex = pageNumber * itemsPerPage;
         const donations = [];
-        // Configure o acesso ao MercadoPago
+        let approvedAmount = 0; // Variável para armazenar o valor total das doações aprovadas
+        let inProcessAmount = 0; // Variável para armazenar o valor total das doações em processo
+        let cancelledAmount = 0; // Variável para armazenar o valor total das doações canceladas
+        let pendingCount = 0; // Variável para contar o número de doações pendentes
+        let totalAmountDonated = 0; // Variável para armazenar o valor total das doações em BRL
+        // Configure o acesso ao MercadoPago  
         mercadopago_1.default.configure({
             access_token: process.env.access_token_prd
         });
         for (const donationId of donationIds.slice(startIndex, endIndex)) {
             try {
-                const payment = await mercadopago_1.default.payment.get(donationId);
+                const paymentResponse = await mercadopago_1.default.payment.get(donationId);
+                const payment = paymentResponse.body;
                 donations.push(payment);
+                switch (payment.status) {
+                    case 'approved':
+                        approvedAmount++;
+                        totalAmountDonated += parseFloat(payment.transaction_amount);
+                        break;
+                    case 'in_process':
+                        inProcessAmount++;
+                        break;
+                    case 'cancelled':
+                        cancelledAmount++;
+                        break;
+                    case 'pending':
+                        pendingCount++;
+                        break;
+                }
             }
             catch (error) {
                 console.error(`Error retrieving payment for donation ID ${donationId}:`, error);
                 donations.push({ error: `Error retrieving payment for donation ID ${donationId}` });
             }
         }
+        // Ordenar as doações pelo campo "date_approved" de forma decrescente
+        donations.sort((a, b) => new Date(b.date_approved).getTime() - new Date(a.date_approved).getTime());
         res.json({
             donations,
+            info: {
+                approvedAmount,
+                inProcessAmount,
+                cancelledAmount,
+                pendingCount,
+                totalAmountDonated: Number(totalAmountDonated.toFixed(2)),
+            },
             page: pageNumber,
             perPage: itemsPerPage,
             totalPages,
@@ -188,7 +220,6 @@ router.get('/donation/get-all', async (req, res) => {
                     console.error(`Information for donation ID ${donationId} not found.`);
                     return { error: `Information for donation ID ${donationId} not found.` };
                 }
-                // Exclude number property from identification
                 const _a = infoPayer.payer.identification, { number } = _a, identificationWithoutNumber = __rest(_a, ["number"]);
                 // Format CPF number
                 const formattedInfoPayer = Object.assign(Object.assign({}, infoPayer.toObject()), { payer: Object.assign(Object.assign({}, infoPayer.payer), { identification: Object.assign(Object.assign({}, identificationWithoutNumber), { partialCPF: (0, index_3.formatCpf)(infoPayer.payer.identification.number) }) }) });

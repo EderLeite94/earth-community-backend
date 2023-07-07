@@ -6,6 +6,7 @@ export interface IDonate {
     transaction_amount: number;
     description: string;
     payment_method_id: string;
+    donateCreateDate: Date;
     payer: {
         user_id: string | null,
         email: string,
@@ -33,6 +34,7 @@ const DonateSchema: Schema = new Schema({
     transaction_amount: { type: String },
     description: { type: String },
     payment_method_id: { type: String },
+    donateCreateDate:{type: Date},
     payer: {
         user_id: { type: String },
         email: { type: String },
