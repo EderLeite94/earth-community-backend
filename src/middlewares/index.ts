@@ -5,11 +5,14 @@ const corsMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const allowedOrigins = ['https://www.earthcommunity.com.br'];
   const corsOptions = {
     origin: allowedOrigins,
-    methods: ['GET', 'PUT', 'POST', 'DELETE', 'PATCH'], // Removed the comma from the methods array
+    methods: ['GET', 'PUT', 'POST', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   };
 
-  cors(corsOptions)(req, res, next); // Added parentheses to invoke the cors function with the correct parameters
+  // Adicione esse cabeçalho para permitir o uso de credenciais (cookies, headers personalizados, etc)
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+  cors(corsOptions)(req, res, next);
 };
 
 export default corsMiddleware;
