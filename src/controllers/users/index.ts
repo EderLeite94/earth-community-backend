@@ -1,5 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import Users, { IUsers } from '../../models/users/index';
+import cors from 'cors';
 import { generateUniqueNickname } from '../../utils/nickname/index';
 import { validateSignUp, validateSignIn } from '../../validations/users/index';
 import { now } from '../../utils/date';
@@ -11,7 +12,7 @@ import Post from '../../models/feed';
 import mongoose from 'mongoose';
 const router = express.Router();
 //register
-router.post('/auth/user/sign-up', corsOptions, validateSignUp, async (req: Request, res: Response, next: NextFunction) => {
+router.post('/auth/user/sign-up', cors(corsOptions), validateSignUp, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { info, security } = req.body;
     const { firstName, surname, email } = info;
