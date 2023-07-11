@@ -1,7 +1,8 @@
-import connectDatabase from './database/index'
+import connectDatabase from './database/index';
+import cors from 'cors';
 import express, { Application } from 'express';
 import dotenv from 'dotenv';
-import corsMiddleware from './middlewares/index';
+import corsOptions from './middlewares/index';
 import routes from './routes/index';
 
 dotenv.config();
@@ -10,7 +11,7 @@ declare const Date: any;
 
 app.use(express.json());
 //Cors
-app.use(corsMiddleware());
+app.use(cors(corsOptions));
 //Conect database
 connectDatabase(app);
 //Routes

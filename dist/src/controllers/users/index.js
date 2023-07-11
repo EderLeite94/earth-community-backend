@@ -9,13 +9,14 @@ const index_2 = require("../../utils/nickname/index");
 const index_3 = require("../../validations/users/index");
 const date_1 = require("../../utils/date");
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const middlewares_1 = __importDefault(require("../../middlewares"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const group_1 = __importDefault(require("../../models/group"));
 const feed_1 = __importDefault(require("../../models/feed"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const router = express_1.default.Router();
 //register
-router.post('/auth/user/sign-up', index_3.validateSignUp, async (req, res, next) => {
+router.post('/auth/user/sign-up', middlewares_1.default, index_3.validateSignUp, async (req, res, next) => {
     try {
         const { info, security } = req.body;
         const { firstName, surname, email } = info;

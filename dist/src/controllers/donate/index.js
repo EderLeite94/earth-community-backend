@@ -131,11 +131,11 @@ router.get('/donation/get-by-user-id/:userId', async (req, res) => {
         const startIndex = (pageNumber - 1) * itemsPerPage;
         const endIndex = pageNumber * itemsPerPage;
         const donations = [];
-        let approvedAmount = 0; // Variável para armazenar o valor total das doações aprovadas
-        let inProcessAmount = 0; // Variável para armazenar o valor total das doações em processo
-        let cancelledAmount = 0; // Variável para armazenar o valor total das doações canceladas
-        let pendingCount = 0; // Variável para contar o número de doações pendentes
-        let totalAmountDonated = 0; // Variável para armazenar o valor total das doações em BRL
+        let approvedAmount = 0;
+        let inProcessAmount = 0;
+        let cancelledAmount = 0;
+        let pendingAmount = 0;
+        let totalAmountDonated = 0;
         // Configure o acesso ao MercadoPago  
         mercadopago_1.default.configure({
             access_token: process.env.access_token_prd
@@ -157,7 +157,7 @@ router.get('/donation/get-by-user-id/:userId', async (req, res) => {
                         cancelledAmount++;
                         break;
                     case 'pending':
-                        pendingCount++;
+                        pendingAmount++;
                         break;
                 }
             }
@@ -174,7 +174,7 @@ router.get('/donation/get-by-user-id/:userId', async (req, res) => {
                 approvedAmount,
                 inProcessAmount,
                 cancelledAmount,
-                pendingCount,
+                pendingAmount,
                 totalAmountDonated: Number(totalAmountDonated.toFixed(2)),
             },
             page: pageNumber,

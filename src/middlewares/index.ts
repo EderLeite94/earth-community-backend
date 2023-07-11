@@ -2,12 +2,13 @@ import cors from 'cors';
 import { RequestHandler } from 'express';
 
 function corsMiddleware(): RequestHandler {
-  const allowedOrigins = ['Access-Control-Allow-Origin', process.env.ORIGIN_CLOUD];
+  const allowedOrigins = ['https://www.earthcommunity.com.br', 'https://example.com'];
   const corsOptions = {
     origin: allowedOrigins,
-    methods: ['POST'],
-    allowedHeaders: ['Access-Control-Allow-Methods','GET, PUT, POST, DELETE, PATCH'],
+    methods: ['GET, PUT, POST, DELETE, PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   };
-  return cors();
+  return cors(corsOptions);
 }
+
 export default corsMiddleware;
