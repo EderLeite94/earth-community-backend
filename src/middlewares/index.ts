@@ -1,16 +1,27 @@
-import cors from 'cors';
+import cors, { CorsOptions } from 'cors';
 import { Request, Response, NextFunction } from 'express';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const corsMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  const allowedOrigins = ['https://www.earthcommunity.com.br'];
-  const corsOptions = {
-    origin: allowedOrigins,
+  const allowedOrigins: (string | undefined)[] = [
+    process.env.ORIGIN_CLOUD, // Valor do ALLOWED_ORIGIN1 no arquivo .env
+    `http://localhost:3000`, // Localhost na porta 3000
+  ].filter(Boolean);
+
+  const corsOptions: CorsOptions = {
+    origin: allowedOrigins as (string | RegExp | boolean)[],
     methods: ['GET', 'PUT', 'POST', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   };
 
-  // Adicione esse cabeçalho para permitir o uso de credenciais (cookies, headers personalizados, etc)
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  // Verifica se o User-Agent é do Postman
+  const isPostman = req.get('User-Agent')?.includes('Postman');
+
+  if (isPostman) {
+    return res.status(403).json({ error: 'Requisições do Postman são bloqueadas.' });
+  }
 
   cors(corsOptions)(req, res, next);
 };
