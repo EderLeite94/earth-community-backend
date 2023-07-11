@@ -6,7 +6,7 @@ function corsMiddleware(): RequestHandler {
   const corsOptions = {
     origin: allowedOrigins,
     methods: ['POST'],
-    allowedHeaders: ['*'],
+    allowedHeaders: ['Access-Control-Allow-Origin'],
   };
   return cors();
 }
