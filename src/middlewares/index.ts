@@ -6,7 +6,7 @@ function corsMiddleware(): RequestHandler {
   const corsOptions = {
     origin: allowedOrigins,
     methods: ['POST'],
-    allowedHeaders: ['Access-Control-Allow-Origin'],
+    allowedHeaders: ['Access-Control-Allow-Origin','https://www.earthcommunity.com.br'],
   };
   return cors();
 }
