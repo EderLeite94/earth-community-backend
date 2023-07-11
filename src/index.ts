@@ -10,8 +10,8 @@ const app = express();
 declare const Date: any;
 
 app.use(express.json());
-//Cors
-app.use(cors(corsOptions));
+// //Cors
+// app.use(cors(corsOptions));
 //Conect database
 connectDatabase(app);
 //Routes

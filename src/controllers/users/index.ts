@@ -5,14 +5,15 @@ import { generateUniqueNickname } from '../../utils/nickname/index';
 import { validateSignUp, validateSignIn } from '../../validations/users/index';
 import { now } from '../../utils/date';
 import bcrypt from 'bcrypt';
-import corsOptions from '../../middlewares';
+import corsMiddleware from '../../middlewares/index';
 import jwt from 'jsonwebtoken';
 import Group from '../../models/group';
 import Post from '../../models/feed';
 import mongoose from 'mongoose';
 const router = express.Router();
+
 //register
-router.post('/auth/user/sign-up', cors(corsOptions), validateSignUp, async (req: Request, res: Response, next: NextFunction) => {
+router.post('/auth/user/sign-up', corsMiddleware, validateSignUp, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { info, security } = req.body;
     const { firstName, surname, email } = info;

@@ -4,14 +4,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const cors_1 = __importDefault(require("cors"));
-function corsMiddleware() {
-    const allowedOrigins = ['https://www.earthcommunity.com.br', 'https://example.com'];
+const corsMiddleware = (req, res, next) => {
+    const allowedOrigins = ['https://www.earthcommunity.com.br'];
     const corsOptions = {
         origin: allowedOrigins,
-        methods: ['GET, PUT, POST, DELETE, PATCH'],
+        methods: ['GET', 'PUT', 'POST', 'DELETE', 'PATCH'],
         allowedHeaders: ['Content-Type', 'Authorization'],
     };
-    return (0, cors_1.default)(corsOptions);
-}
+    (0, cors_1.default)(corsOptions)(req, res, next); // Added parentheses to invoke the cors function with the correct parameters
+};
 exports.default = corsMiddleware;
 //# sourceMappingURL=index.js.map
