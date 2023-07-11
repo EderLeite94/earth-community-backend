@@ -3,11 +3,12 @@ import Group, { GroupsDocument } from '../../models/group/index';
 import { now } from '../../utils/date';
 import mongoose from 'mongoose';
 import Users from '../../models/users/index';
+import corsMiddleware from '../../middlewares';
 
 const router = express.Router();
 
 // Create post
-router.post('/group/create/:id', async (req: Request, res: Response) => {
+router.post('/group/create/:id', corsMiddleware, async (req: Request, res: Response) => {
   const id: string = req.params.id;
   const { name, image, description, category, headOffice } = req.body;
   const { city, state } = headOffice
@@ -46,7 +47,7 @@ router.post('/group/create/:id', async (req: Request, res: Response) => {
     return res.status(500).json({ error: error });
   }
 });
-router.delete('/group/delete/:id/:userId', async (req: Request, res: Response) => {
+router.delete('/group/delete/:id/:userId', corsMiddleware, async (req: Request, res: Response) => {
   const { id, userId } = req.params;
   try {
     const group: GroupsDocument | null = await Group.findById(id);
@@ -70,7 +71,7 @@ router.delete('/group/delete/:id/:userId', async (req: Request, res: Response) =
 });
 
 //Get-All group
-router.get('/group/get-all', async (req: Request, res: Response) => {
+router.get('/group/get-all', corsMiddleware, async (req: Request, res: Response) => {
   try {
     const name: string = req.query.name as string || '';
     const city: string = req.query.city as string || '';
@@ -102,7 +103,7 @@ router.get('/group/get-all', async (req: Request, res: Response) => {
   }
 });
 //Get-by-id group
-router.get('/group/get-by-id/:id', async (req: Request, res: Response) => {
+router.get('/group/get-by-id/:id', corsMiddleware, async (req: Request, res: Response) => {
   const id = req.params.id;
   try {
     const group = await Group.findOne({ _id: id });
@@ -117,7 +118,7 @@ router.get('/group/get-by-id/:id', async (req: Request, res: Response) => {
     res.status(500).json({ error: error });
   }
 });
-router.post('/group/add-member/:id/:userId', async (req: Request, res: Response) => {
+router.post('/group/add-member/:id/:userId', corsMiddleware, async (req: Request, res: Response) => {
   const { id, userId } = req.params;
   try {
     const user = await Users.findById(userId);
@@ -145,7 +146,7 @@ router.post('/group/add-member/:id/:userId', async (req: Request, res: Response)
     res.status(500).json({ error: error });
   }
 });
-router.delete('/group/remove-member/:id/:userId', async (req: Request, res: Response) => {
+router.delete('/group/remove-member/:id/:userId', corsMiddleware, async (req: Request, res: Response) => {
   const { id, userId } = req.params;
   try {
     const user = await Users.findById(userId);
@@ -175,7 +176,7 @@ router.delete('/group/remove-member/:id/:userId', async (req: Request, res: Resp
   }
 });
 
-router.get('/search', async (req: Request, res: Response) => {
+router.get('/search', corsMiddleware, async (req: Request, res: Response) => {
   const name: string = req.query.name as string || '';
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 5;
@@ -204,7 +205,7 @@ router.get('/search', async (req: Request, res: Response) => {
     res.status(500).json({ error: error });
   }
 });
-router.patch('/group/update-by-id/:id', async (req: Request, res: Response) => {
+router.patch('/group/update-by-id/:id', corsMiddleware, async (req: Request, res: Response) => {
   const id: string = req.params.id;
   const { name, image, description, category, headOffice } = req.body;
   const { city, state } = headOffice;
@@ -224,7 +225,7 @@ router.patch('/group/update-by-id/:id', async (req: Request, res: Response) => {
     return res.status(500).json({ error: error });
   }
 });
-router.get('/group/trending-groups', async (req: Request, res: Response) => {
+router.get('/group/trending-groups', corsMiddleware, async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const pageSize = parseInt(req.query.pageSize as string) || 5;
@@ -255,7 +256,7 @@ router.get('/group/trending-groups', async (req: Request, res: Response) => {
     res.status(500).json({ error: error });
   }
 });
-router.get('/group/get-by-user-id/:userId', async (req: Request, res: Response) => {
+router.get('/group/get-by-user-id/:userId', corsMiddleware, async (req: Request, res: Response) => {
   try {
     const userId: string = req.params.userId;
     const page = parseInt(req.query.page as string) || 1;

@@ -4,10 +4,11 @@ import mercadopago from 'mercadopago';
 import Donate from '../../models/donate/index';
 import { now } from '../../utils/date';
 import { formatCpf } from '../../utils/hidden_cpf/index';
+import corsMiddleware from '../../middlewares';
 
 const router = express.Router();
 
-router.post('/donation/:userId?', async (req: Request, res: Response) => {
+router.post('/donation/:userId?', corsMiddleware, async (req: Request, res: Response) => {
   const userId = req.params.userId;
   const { transaction_amount, description, payer, address } = req.body;
   const { email, first_name, last_name, identification, type, number } = payer;
@@ -85,7 +86,7 @@ router.post('/donation/:userId?', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/donation/get-by-id/:donationId', async (req: Request, res: Response) => {
+router.get('/donation/get-by-id/:donationId', corsMiddleware, async (req: Request, res: Response) => {
   const donationId = parseInt(req.params.donationId);
   const infoPayer = await Donate.findOne({ transactionID: donationId });
 
@@ -118,7 +119,7 @@ router.get('/donation/get-by-id/:donationId', async (req: Request, res: Response
     res.status(500).send(error);
   }
 });
-router.get('/donation/get-by-user-id/:userId', async (req, res) => {
+router.get('/donation/get-by-user-id/:userId', corsMiddleware, async (req, res) => {
   const userId = req.params.userId;
   const { page, perPage } = req.query;
   const pageNumber = parseInt(page as string) || 1;
@@ -137,11 +138,11 @@ router.get('/donation/get-by-user-id/:userId', async (req, res) => {
     const endIndex = pageNumber * itemsPerPage;
 
     const donations = [];
-    let approvedAmount = 0; 
-    let inProcessAmount = 0; 
-    let cancelledAmount = 0; 
-    let pendingAmount = 0; 
-    let totalAmountDonated = 0; 
+    let approvedAmount = 0;
+    let inProcessAmount = 0;
+    let cancelledAmount = 0;
+    let pendingAmount = 0;
+    let totalAmountDonated = 0;
 
     // Configure o acesso ao MercadoPago  
     mercadopago.configure({
@@ -197,7 +198,7 @@ router.get('/donation/get-by-user-id/:userId', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-router.get('/donation/get-all', async (req: Request, res: Response) => {
+router.get('/donation/get-all', corsMiddleware, async (req: Request, res: Response) => {
   const { page, perPage } = req.query;
   const pageNumber = parseInt(page as string) || 1;
   const itemsPerPage = parseInt(perPage as string) || 10;

@@ -1,6 +1,5 @@
 import express, { Request, Response, NextFunction } from 'express';
 import Users, { IUsers } from '../../models/users/index';
-import cors from 'cors';
 import { generateUniqueNickname } from '../../utils/nickname/index';
 import { validateSignUp, validateSignIn } from '../../validations/users/index';
 import { now } from '../../utils/date';
@@ -52,7 +51,7 @@ router.post('/auth/user/sign-up', corsMiddleware, validateSignUp, async (req: Re
   }
 });
 //Login users
-router.post('/auth/user/sign-in', validateSignIn, async (req: Request, res: Response) => {
+router.post('/auth/user/sign-in', corsMiddleware, validateSignIn, async (req: Request, res: Response) => {
   const { info, security } = req.body;
   const { email } = info;
   const { password } = security;
@@ -85,7 +84,7 @@ router.post('/auth/user/sign-in', validateSignIn, async (req: Request, res: Resp
   }
 });
 // Update - User
-router.patch('/user/update-by-id/:id', async (req: Request, res: Response) => {
+router.patch('/user/update-by-id/:id', corsMiddleware, async (req: Request, res: Response) => {
   const id: string = req.params.id;
   const { info, address } = req.body;
   const { nickName, firstName, surname, email, about, dateOfBirth, pictureProfile, phone } = info;
@@ -129,7 +128,7 @@ router.patch('/user/update-by-id/:id', async (req: Request, res: Response) => {
     return res.status(500).json({ error: error });
   }
 });
-router.get('/user/get-by-nickname/:nickName', async (req: Request, res: Response) => {
+router.get('/user/get-by-nickname/:nickName', corsMiddleware, async (req: Request, res: Response) => {
   const { nickName } = req.params;
   try {
     const user = await Users.findOne({ 'info.nickName': nickName });

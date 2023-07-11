@@ -20,9 +20,10 @@ import {
     Sports,
     TechnologyInnovation
 } from './categories';
+import corsMiddleware from '../../middlewares';
 const router = express.Router();
 
-router.post('/achievement/:id', async (req: Request, res: Response) => {
+router.post('/achievement/:id', corsMiddleware, async (req: Request, res: Response) => {
     const id = req.params.id;
 
     try {
