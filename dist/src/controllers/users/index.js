@@ -53,7 +53,7 @@ router.post('/auth/user/sign-up', index_4.default, index_3.validateSignUp, async
     }
 });
 //Login users
-router.post('/auth/user/sign-in', index_3.validateSignIn, async (req, res) => {
+router.post('/auth/user/sign-in', index_4.default, index_3.validateSignIn, async (req, res) => {
     const { info, security } = req.body;
     const { email } = info;
     const { password } = security;
@@ -81,7 +81,7 @@ router.post('/auth/user/sign-in', index_3.validateSignIn, async (req, res) => {
     }
 });
 // Update - User
-router.patch('/user/update-by-id/:id', async (req, res) => {
+router.patch('/user/update-by-id/:id', index_4.default, async (req, res) => {
     const id = req.params.id;
     const { info, address } = req.body;
     const { nickName, firstName, surname, email, about, dateOfBirth, pictureProfile, phone } = info;
@@ -119,7 +119,7 @@ router.patch('/user/update-by-id/:id', async (req, res) => {
         return res.status(500).json({ error: error });
     }
 });
-router.get('/user/get-by-nickname/:nickName', async (req, res) => {
+router.get('/user/get-by-nickname/:nickName', index_4.default, async (req, res) => {
     const { nickName } = req.params;
     try {
         const user = await index_1.default.findOne({ 'info.nickName': nickName });

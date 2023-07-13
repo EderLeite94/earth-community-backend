@@ -7,9 +7,10 @@ const express_1 = __importDefault(require("express"));
 const index_1 = __importDefault(require("../../models/group/index"));
 const date_1 = require("../../utils/date");
 const index_2 = __importDefault(require("../../models/users/index"));
+const middlewares_1 = __importDefault(require("../../middlewares"));
 const router = express_1.default.Router();
 // Create post
-router.post('/group/create/:id', async (req, res) => {
+router.post('/group/create/:id', middlewares_1.default, async (req, res) => {
     const id = req.params.id;
     const { name, image, description, category, headOffice } = req.body;
     const { city, state } = headOffice;
@@ -48,7 +49,7 @@ router.post('/group/create/:id', async (req, res) => {
         return res.status(500).json({ error: error });
     }
 });
-router.delete('/group/delete/:id/:userId', async (req, res) => {
+router.delete('/group/delete/:id/:userId', middlewares_1.default, async (req, res) => {
     const { id, userId } = req.params;
     try {
         const group = await index_1.default.findById(id);
@@ -69,7 +70,7 @@ router.delete('/group/delete/:id/:userId', async (req, res) => {
     }
 });
 //Get-All group
-router.get('/group/get-all', async (req, res) => {
+router.get('/group/get-all', middlewares_1.default, async (req, res) => {
     try {
         const name = req.query.name || '';
         const city = req.query.city || '';
@@ -100,7 +101,7 @@ router.get('/group/get-all', async (req, res) => {
     }
 });
 //Get-by-id group
-router.get('/group/get-by-id/:id', async (req, res) => {
+router.get('/group/get-by-id/:id', middlewares_1.default, async (req, res) => {
     const id = req.params.id;
     try {
         const group = await index_1.default.findOne({ _id: id });
@@ -116,7 +117,7 @@ router.get('/group/get-by-id/:id', async (req, res) => {
         res.status(500).json({ error: error });
     }
 });
-router.post('/group/add-member/:id/:userId', async (req, res) => {
+router.post('/group/add-member/:id/:userId', middlewares_1.default, async (req, res) => {
     const { id, userId } = req.params;
     try {
         const user = await index_2.default.findById(userId);
@@ -143,7 +144,7 @@ router.post('/group/add-member/:id/:userId', async (req, res) => {
         res.status(500).json({ error: error });
     }
 });
-router.delete('/group/remove-member/:id/:userId', async (req, res) => {
+router.delete('/group/remove-member/:id/:userId', middlewares_1.default, async (req, res) => {
     const { id, userId } = req.params;
     try {
         const user = await index_2.default.findById(userId);
@@ -173,7 +174,7 @@ router.delete('/group/remove-member/:id/:userId', async (req, res) => {
         res.status(500).json({ error: error });
     }
 });
-router.get('/search', async (req, res) => {
+router.get('/search', middlewares_1.default, async (req, res) => {
     const name = req.query.name || '';
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
@@ -198,7 +199,7 @@ router.get('/search', async (req, res) => {
         res.status(500).json({ error: error });
     }
 });
-router.patch('/group/update-by-id/:id', async (req, res) => {
+router.patch('/group/update-by-id/:id', middlewares_1.default, async (req, res) => {
     const id = req.params.id;
     const { name, image, description, category, headOffice } = req.body;
     const { city, state } = headOffice;
@@ -218,7 +219,7 @@ router.patch('/group/update-by-id/:id', async (req, res) => {
         return res.status(500).json({ error: error });
     }
 });
-router.get('/group/trending-groups', async (req, res) => {
+router.get('/group/trending-groups', middlewares_1.default, async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const pageSize = parseInt(req.query.pageSize) || 5;
@@ -248,7 +249,7 @@ router.get('/group/trending-groups', async (req, res) => {
         res.status(500).json({ error: error });
     }
 });
-router.get('/group/get-by-user-id/:userId', async (req, res) => {
+router.get('/group/get-by-user-id/:userId', middlewares_1.default, async (req, res) => {
     try {
         const userId = req.params.userId;
         const page = parseInt(req.query.page) || 1;

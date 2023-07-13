@@ -20,8 +20,9 @@ const mercadopago_1 = __importDefault(require("mercadopago"));
 const index_2 = __importDefault(require("../../models/donate/index"));
 const date_1 = require("../../utils/date");
 const index_3 = require("../../utils/hidden_cpf/index");
+const middlewares_1 = __importDefault(require("../../middlewares"));
 const router = express_1.default.Router();
-router.post('/donation/:userId?', async (req, res) => {
+router.post('/donation/:userId?', middlewares_1.default, async (req, res) => {
     const userId = req.params.userId;
     const { transaction_amount, description, payer, address } = req.body;
     const { email, first_name, last_name, identification, type, number } = payer;
@@ -96,7 +97,7 @@ router.post('/donation/:userId?', async (req, res) => {
         res.status(500).send(error);
     }
 });
-router.get('/donation/get-by-id/:donationId', async (req, res) => {
+router.get('/donation/get-by-id/:donationId', middlewares_1.default, async (req, res) => {
     const donationId = parseInt(req.params.donationId);
     const infoPayer = await index_2.default.findOne({ transactionID: donationId });
     if (!infoPayer) {
@@ -116,7 +117,7 @@ router.get('/donation/get-by-id/:donationId', async (req, res) => {
         res.status(500).send(error);
     }
 });
-router.get('/donation/get-by-user-id/:userId', async (req, res) => {
+router.get('/donation/get-by-user-id/:userId', middlewares_1.default, async (req, res) => {
     const userId = req.params.userId;
     const { page, perPage } = req.query;
     const pageNumber = parseInt(page) || 1;
@@ -188,7 +189,7 @@ router.get('/donation/get-by-user-id/:userId', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-router.get('/donation/get-all', async (req, res) => {
+router.get('/donation/get-all', middlewares_1.default, async (req, res) => {
     const { page, perPage } = req.query;
     const pageNumber = parseInt(page) || 1;
     const itemsPerPage = parseInt(perPage) || 10;
@@ -212,6 +213,8 @@ router.get('/donation/get-all', async (req, res) => {
         mercadopago_1.default.configure({
             access_token: process.env.access_token_prd,
         });
+        let approvedAmount = 0;
+        let totalAmountDonated = 0;
         const donationPromises = donationIds.map(async (donationId) => {
             try {
                 const payment = await mercadopago_1.default.payment.get(donationId);
@@ -223,7 +226,13 @@ router.get('/donation/get-all', async (req, res) => {
                 const _a = infoPayer.payer.identification, { number } = _a, identificationWithoutNumber = __rest(_a, ["number"]);
                 // Format CPF number
                 const formattedInfoPayer = Object.assign(Object.assign({}, infoPayer.toObject()), { payer: Object.assign(Object.assign({}, infoPayer.payer), { identification: Object.assign(Object.assign({}, identificationWithoutNumber), { partialCPF: (0, index_3.formatCpf)(infoPayer.payer.identification.number) }) }) });
-                return Object.assign(Object.assign({}, payment), { infoPayer: formattedInfoPayer });
+                const transactionAmount = parseFloat(payment.body.transaction_amount); // Converter para número
+                const donationResult = Object.assign(Object.assign({}, payment), { infoPayer: formattedInfoPayer, transactionAmount });
+                if ('status' in payment && payment.body.status === 'approved') {
+                    approvedAmount++;
+                    totalAmountDonated += transactionAmount;
+                }
+                return donationResult;
             }
             catch (error) {
                 console.error(`Error retrieving payment for donation ID ${donationId}:`, error);
@@ -237,9 +246,20 @@ router.get('/donation/get-all', async (req, res) => {
             }
             return false;
         });
+        // Calculate the sum of transaction_amount
+        const sumTransactionAmount = donationsResult.reduce((sum, donationResult) => {
+            if ('transactionAmount' in donationResult) {
+                const transactionAmount = donationResult.transactionAmount;
+                return sum + transactionAmount;
+            }
+            return sum;
+        }, 0);
         const slicedDonations = donationsResult.slice(startIndex, endIndex);
         res.json({
             donations: slicedDonations,
+            info: {
+                totalAmountDonated: Number(totalAmountDonated.toFixed(2)),
+            },
             page: pageNumber,
             perPage: itemsPerPage,
             totalPages,

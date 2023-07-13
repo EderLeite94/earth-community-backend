@@ -5,8 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const categories_1 = require("./categories");
+const middlewares_1 = __importDefault(require("../../middlewares"));
 const router = express_1.default.Router();
-router.post('/achievement/:id', async (req, res) => {
+router.post('/achievement/:id', middlewares_1.default, async (req, res) => {
     const id = req.params.id;
     try {
         const firstpass = await (0, categories_1.FirstPass)(id);

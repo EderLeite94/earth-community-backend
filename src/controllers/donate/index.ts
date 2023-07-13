@@ -226,6 +226,9 @@ router.get('/donation/get-all', corsMiddleware, async (req: Request, res: Respon
       access_token: process.env.access_token_prd as string,
     });
 
+    let approvedAmount = 0;
+    let totalAmountDonated = 0;
+
     const donationPromises = donationIds.map(async (donationId) => {
       try {
         const payment = await mercadopago.payment.get(donationId);
@@ -235,7 +238,6 @@ router.get('/donation/get-all', corsMiddleware, async (req: Request, res: Respon
           console.error(`Information for donation ID ${donationId} not found.`);
           return { error: `Information for donation ID ${donationId} not found.` };
         }
-
 
         const { number, ...identificationWithoutNumber } = infoPayer.payer.identification;
 
@@ -251,10 +253,20 @@ router.get('/donation/get-all', corsMiddleware, async (req: Request, res: Respon
           },
         };
 
-        return {
+        const transactionAmount = parseFloat(payment.body.transaction_amount); // Converter para número
+
+        const donationResult = {
           ...payment,
           infoPayer: formattedInfoPayer,
+          transactionAmount, // Adicionar o valor como número
         };
+
+        if ('status' in payment && payment.body.status === 'approved') {
+          approvedAmount++;
+          totalAmountDonated += transactionAmount;
+        }
+
+        return donationResult;
       } catch (error) {
         console.error(`Error retrieving payment for donation ID ${donationId}:`, error);
         return { error: `Error retrieving payment for donation ID ${donationId}` };
@@ -269,10 +281,22 @@ router.get('/donation/get-all', corsMiddleware, async (req: Request, res: Respon
       return false;
     });
 
+    // Calculate the sum of transaction_amount
+    const sumTransactionAmount = donationsResult.reduce((sum, donationResult) => {
+      if ('transactionAmount' in donationResult) {
+        const transactionAmount = donationResult.transactionAmount as number;
+        return sum + transactionAmount;
+      }
+      return sum;
+    }, 0);
+
     const slicedDonations = donationsResult.slice(startIndex, endIndex);
 
     res.json({
       donations: slicedDonations,
+      info: {
+        totalAmountDonated: Number(totalAmountDonated.toFixed(2)),
+      },
       page: pageNumber,
       perPage: itemsPerPage,
       totalPages,
@@ -283,5 +307,4 @@ router.get('/donation/get-all', corsMiddleware, async (req: Request, res: Respon
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 export default router;

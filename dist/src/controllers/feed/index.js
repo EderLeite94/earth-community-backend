@@ -9,9 +9,10 @@ const index_1 = __importDefault(require("../../models/feed/index"));
 const index_2 = __importDefault(require("../../models/users/index"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const group_1 = __importDefault(require("../../models/group"));
+const middlewares_1 = __importDefault(require("../../middlewares"));
 const router = express_1.default.Router();
 // Create post
-router.post('/post/create/:id/:groupID', async (req, res) => {
+router.post('/post/create/:id/:groupID', middlewares_1.default, async (req, res) => {
     const id = req.params.id;
     const groupID = req.params.groupID;
     const { text, image } = req.body;
@@ -67,7 +68,7 @@ router.post('/post/create/:id/:groupID', async (req, res) => {
     }
 });
 //Delete post 
-router.delete('/post/delete/:id', async (req, res) => {
+router.delete('/post/delete/:id', middlewares_1.default, async (req, res) => {
     const id = req.params.id;
     try {
         const post = await index_1.default.findById(id);
@@ -83,7 +84,7 @@ router.delete('/post/delete/:id', async (req, res) => {
     }
 });
 // Get all post
-router.get('/post/get-all', async (req, res) => {
+router.get('/post/get-all', middlewares_1.default, async (req, res) => {
     try {
         const { page, perPage } = req.query;
         const pageNumber = parseInt(page) || 1;
@@ -108,7 +109,7 @@ router.get('/post/get-all', async (req, res) => {
     }
 });
 // Get - Post ID
-router.get('/post/get-by-id/:id', async (req, res) => {
+router.get('/post/get-by-id/:id', middlewares_1.default, async (req, res) => {
     const id = req.params.id;
     try {
         const post = await index_1.default.findOne({ _id: id });
@@ -123,7 +124,7 @@ router.get('/post/get-by-id/:id', async (req, res) => {
     }
 });
 // Get - Post createdByGroupId
-router.get('/post/get-group-by-id/:id', async (req, res) => {
+router.get('/post/get-group-by-id/:id', middlewares_1.default, async (req, res) => {
     const id = req.params.id;
     const page = parseInt(req.query.page) || 1; // Página atual (padrão: 1)
     const perPage = parseInt(req.query.perPage) || 10; // Itens por página (padrão: 10)
@@ -140,7 +141,7 @@ router.get('/post/get-group-by-id/:id', async (req, res) => {
     }
 });
 // Like and unlike
-router.post('/post/like/:id/:userId', async (req, res) => {
+router.post('/post/like/:id/:userId', middlewares_1.default, async (req, res) => {
     const { id, userId } = req.params;
     try {
         const post = await index_1.default.findById(id);
@@ -167,7 +168,7 @@ router.post('/post/like/:id/:userId', async (req, res) => {
     }
 });
 //Comment
-router.post('/post/comment/:id/:userId', async (req, res) => {
+router.post('/post/comment/:id/:userId', middlewares_1.default, async (req, res) => {
     const { id, userId } = req.params;
     const { comment } = req.body;
     try {
@@ -199,7 +200,7 @@ router.post('/post/comment/:id/:userId', async (req, res) => {
     }
 });
 //delete comment
-router.delete('/post/delete-comment/:id/:id_comments', async (req, res) => {
+router.delete('/post/delete-comment/:id/:id_comments', middlewares_1.default, async (req, res) => {
     const { id, id_comments } = req.params;
     try {
         const post = await index_1.default.findById(id);
