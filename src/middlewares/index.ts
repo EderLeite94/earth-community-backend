@@ -17,11 +17,11 @@ const corsMiddleware = (req: Request, res: Response, next: NextFunction) => {
   };
 
   // Verifica se o User-Agent é do Postman
-  // const isPostman = req.get('User-Agent')?.includes('Postman');
+  const isPostman = req.get('User-Agent')?.includes('Postman');
 
-  // if (isPostman) {
-  //   return res.status(403).json({ error: 'Requisições do Postman são bloqueadas.' });
-  // }
+  if (isPostman) {
+    return res.status(403).json({ error: 'Requisições do Postman são bloqueadas.' });
+  }
 
   cors(corsOptions)(req, res, next);
 };
