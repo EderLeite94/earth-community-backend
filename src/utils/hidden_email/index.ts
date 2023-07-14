@@ -5,7 +5,7 @@ export function formatEmail(email: string): string {
 
   const visibleCharacters = 2; // Número de caracteres visíveis no início
   const hiddenCharacters = username.length - visibleCharacters; // Número de caracteres ocultos
-  const hiddenPart = '*'.repeat(hiddenCharacters);
+  const hiddenPart = '*****';
 
   const formattedUsername = `${username.slice(0, visibleCharacters)}${hiddenPart}`;
   const formattedEmail = `${formattedUsername}@${domain}`;
