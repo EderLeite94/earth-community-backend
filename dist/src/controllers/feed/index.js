@@ -92,7 +92,7 @@ router.get('/post/get-all', middlewares_1.default, async (req, res) => {
         const totalData = await index_1.default.countDocuments();
         const totalPages = Math.ceil(totalData / itemsPerPage);
         const posts = await index_1.default.find()
-            .sort({ 'likes.quantity': -1 }) // Sort by likes.quantity in descending order
+            .sort({ createdAt: -1 }) // Sort by security.accountCreateDate in descending order
             .skip((pageNumber - 1) * itemsPerPage)
             .limit(itemsPerPage);
         res.status(200).json({

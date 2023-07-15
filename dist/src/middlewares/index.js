@@ -16,7 +16,7 @@ const corsMiddleware = (req, res, next) => {
         methods: ['GET', 'PUT', 'POST', 'DELETE', 'PATCH'],
         allowedHeaders: ['Content-Type', 'Authorization'],
     };
-    // Verifica se o User-Agent é do Postman
+    // // Verifica se o User-Agent é do Postman
     // const isPostman = req.get('User-Agent')?.includes('Postman');
     // if (isPostman) {
     //   return res.status(403).json({ error: 'Requisições do Postman são bloqueadas.' });
