@@ -99,7 +99,7 @@ router.get('/post/get-all', corsMiddleware, async (req: Request, res: Response) 
         const totalPages = Math.ceil(totalData / itemsPerPage);
 
         const posts = await Post.find()
-            .sort({ 'likes.quantity': -1 }) // Sort by likes.quantity in descending order
+            .sort({ createdAt: -1 }) // Sort by createdAt in descending order
             .skip((pageNumber - 1) * itemsPerPage)
             .limit(itemsPerPage);
 
@@ -143,6 +143,7 @@ router.get('/post/get-group-by-id/:id', corsMiddleware, async (req: Request, res
         const totalPages = Math.ceil(totalData / perPage);
 
         const posts = await Post.find({ 'createdByGroup.group._id': id })
+            .sort({ createdAt: -1 }) // Sort by createdAt in descending order
             .skip((page - 1) * perPage)
             .limit(perPage);
 
