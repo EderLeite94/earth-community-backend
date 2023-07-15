@@ -5,7 +5,7 @@ import Donate from '../../models/donate/index';
 import { now } from '../../utils/date';
 import { formatCpf } from '../../utils/hidden_cpf/index';
 import { formatEmail } from '../../utils/hidden_email/index'
-import corsMiddleware from '../../middlewares';
+import corsMiddleware from '../../middlewares/index';
 
 const router = express.Router();
 
