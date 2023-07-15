@@ -33,7 +33,7 @@ router.post('/post/create/:id/:groupID', corsMiddleware, async (req: Request, re
             _id: user._id,
             user: user
         },
-        createdAt: now,
+        createdAt: now(),
         createdByGroup: {
             group: {
                 _id: group._id,
@@ -189,8 +189,6 @@ router.post('/post/comment/:id/:userId', corsMiddleware, async (req: Request, re
     const { id, userId } = req.params;
     const { comment } = req.body;
     try {
-        const data = new Date();
-        const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
         const post = await Post.findById(id);
         if (!post) {
             return res.status(404).send({ error: 'Post não encontrado' });
@@ -205,7 +203,7 @@ router.post('/post/comment/:id/:userId', corsMiddleware, async (req: Request, re
         post.comments.push({
             user: user,
             comment,
-            createdAt: now,
+            createdAt: now(),
             _id: new mongoose.Types.ObjectId()
         });
         await post.save();

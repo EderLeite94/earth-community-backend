@@ -36,7 +36,7 @@ router.post('/auth/user/sign-up', index_4.default, index_3.validateSignUp, async
             security: {
                 authWith,
                 password: passwordHash,
-                accountCreateDate: date_1.now
+                accountCreateDate: (0, date_1.now)()
             }
         };
         // Insert user in database

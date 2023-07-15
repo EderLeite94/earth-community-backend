@@ -57,7 +57,7 @@ router.post('/donation/:userId?', corsMiddleware, async (req: Request, res: Resp
       transaction_amount,
       description,
       payment_method_id: "pix",
-      donateCreateDate: now,
+      donateCreateDate: now(),
       payer: {
         user_id: userId || null,
         email,

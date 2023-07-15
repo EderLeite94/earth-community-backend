@@ -27,7 +27,7 @@ router.post('/group/create/:id', corsMiddleware, async (req: Request, res: Respo
       _id: user._id,
       user: user
     },
-    createdAt: now
+    createdAt: now()
   }
 
   if (!name) {

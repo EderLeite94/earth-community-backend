@@ -32,7 +32,7 @@ router.post('/post/create/:id/:groupID', middlewares_1.default, async (req, res)
             _id: user._id,
             user: user
         },
-        createdAt: date_1.now,
+        createdAt: (0, date_1.now)(),
         createdByGroup: {
             group: {
                 _id: group._id,
@@ -92,7 +92,7 @@ router.get('/post/get-all', middlewares_1.default, async (req, res) => {
         const totalData = await index_1.default.countDocuments();
         const totalPages = Math.ceil(totalData / itemsPerPage);
         const posts = await index_1.default.find()
-            .sort({ createdAt: -1 }) // Sort by security.accountCreateDate in descending order
+            .sort({ createdAt: -1 }) // Sort by createdAt in descending order
             .skip((pageNumber - 1) * itemsPerPage)
             .limit(itemsPerPage);
         res.status(200).json({
@@ -132,6 +132,7 @@ router.get('/post/get-group-by-id/:id', middlewares_1.default, async (req, res) 
         const totalData = await index_1.default.countDocuments({ 'createdByGroup._id': id });
         const totalPages = Math.ceil(totalData / perPage);
         const posts = await index_1.default.find({ 'createdByGroup.group._id': id })
+            .sort({ createdAt: -1 }) // Sort by createdAt in descending order
             .skip((page - 1) * perPage)
             .limit(perPage);
         res.status(200).json({ posts, page, perPage, totalPages, totalData });
@@ -172,8 +173,6 @@ router.post('/post/comment/:id/:userId', middlewares_1.default, async (req, res)
     const { id, userId } = req.params;
     const { comment } = req.body;
     try {
-        const data = new Date();
-        const now = new Date(data.getTime() - (3 * 60 * 60 * 1000));
         const post = await index_1.default.findById(id);
         if (!post) {
             return res.status(404).send({ error: 'Post não encontrado' });
@@ -188,7 +187,7 @@ router.post('/post/comment/:id/:userId', middlewares_1.default, async (req, res)
         post.comments.push({
             user: user,
             comment,
-            createdAt: now,
+            createdAt: (0, date_1.now)(),
             _id: new mongoose_1.default.Types.ObjectId()
         });
         await post.save();
