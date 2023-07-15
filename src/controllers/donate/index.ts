@@ -120,7 +120,7 @@ router.get('/donation/get-by-id/:donationId', corsMiddleware, async (req: Reques
     res.status(500).send(error);
   }
 });
-router.get('/donation/get-by-user-id/:userId', corsMiddleware, async (req: Request, res: Response) => {
+router.get('/donation/get-by-user-id/:userId', corsMiddleware, async (req, res) => {
   const userId = req.params.userId;
   const { page, perPage } = req.query;
   const pageNumber = parseInt(page as string) || 1;
@@ -139,24 +139,56 @@ router.get('/donation/get-by-user-id/:userId', corsMiddleware, async (req: Reque
     const endIndex = pageNumber * itemsPerPage;
 
     const donations = [];
+    let approvedAmount = 0;
+    let inProcessAmount = 0;
+    let cancelledAmount = 0;
+    let pendingAmount = 0;
+    let totalAmountDonated = 0;
 
-    // Configure o acesso ao MercadoPago
+    // Configure o acesso ao MercadoPago  
     mercadopago.configure({
       access_token: process.env.access_token_prd as string
     });
 
     for (const donationId of donationIds.slice(startIndex, endIndex)) {
       try {
-        const payment = await mercadopago.payment.get(donationId);
+        const paymentResponse = await mercadopago.payment.get(donationId);
+        const payment = paymentResponse.body;
         donations.push(payment);
+
+        switch (payment.status) {
+          case 'approved':
+            approvedAmount++;
+            totalAmountDonated += parseFloat(payment.transaction_amount);
+            break;
+          case 'in_process':
+            inProcessAmount++;
+            break;
+          case 'cancelled':
+            cancelledAmount++;
+            break;
+          case 'pending':
+            pendingAmount++;
+            break;
+        }
       } catch (error) {
         console.error(`Error retrieving payment for donation ID ${donationId}:`, error);
         donations.push({ error: `Error retrieving payment for donation ID ${donationId}` });
       }
     }
 
+    // Ordenar as doações pelo campo "date_approved" de forma decrescente
+    donations.sort((a, b) => new Date(b.date_approved).getTime() - new Date(a.date_approved).getTime());
+
     res.json({
       donations,
+      info: {
+        approvedAmount,
+        inProcessAmount,
+        cancelledAmount,
+        pendingAmount,
+        totalAmountDonated: Number(totalAmountDonated.toFixed(2)),
+      },
       page: pageNumber,
       perPage: itemsPerPage,
       totalPages,
