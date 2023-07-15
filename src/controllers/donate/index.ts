@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import Users from '../../models/users/index';
 import mercadopago from 'mercadopago';
 import Donate from '../../models/donate/index';
@@ -9,7 +9,7 @@ import corsMiddleware from '../../middlewares';
 
 const router = express.Router();
 
-router.post('/donation/:userId?', corsMiddleware, async (req: Request, res: Response) => {
+router.post('/donation/:userId?', corsMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   const userId = req.params.userId;
   const { transaction_amount, description, payer, address } = req.body;
   const { email, first_name, last_name, identification, type, number } = payer;
@@ -87,7 +87,7 @@ router.post('/donation/:userId?', corsMiddleware, async (req: Request, res: Resp
   }
 });
 
-router.get('/donation/get-by-id/:donationId', corsMiddleware, async (req: Request, res: Response) => {
+router.get('/donation/get-by-id/:donationId', corsMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   const donationId = parseInt(req.params.donationId);
   const infoPayer = await Donate.findOne({ transactionID: donationId });
 
@@ -120,7 +120,54 @@ router.get('/donation/get-by-id/:donationId', corsMiddleware, async (req: Reques
     res.status(500).send(error);
   }
 });
-router.get('/donation/get-all', corsMiddleware, async (req: Request, res: Response) => {
+router.get('/donation/get-by-user-id/:userId', corsMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+  const userId = req.params.userId;
+  const { page, perPage } = req.query;
+  const pageNumber = parseInt(page as string) || 1;
+  const itemsPerPage = parseInt(perPage as string) || 10;
+
+  try {
+    const user = await Users.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+
+    const donationIds = user.donationIds;
+    const totalPages = Math.ceil(donationIds.length / itemsPerPage);
+    const startIndex = (pageNumber - 1) * itemsPerPage;
+    const endIndex = pageNumber * itemsPerPage;
+
+    const donations = [];
+
+    // Configure o acesso ao MercadoPago
+    mercadopago.configure({
+      access_token: process.env.access_token_prd as string
+    });
+
+    for (const donationId of donationIds.slice(startIndex, endIndex)) {
+      try {
+        const payment = await mercadopago.payment.get(donationId);
+        donations.push(payment);
+      } catch (error) {
+        console.error(`Error retrieving payment for donation ID ${donationId}:`, error);
+        donations.push({ error: `Error retrieving payment for donation ID ${donationId}` });
+      }
+    }
+
+    res.json({
+      donations,
+      page: pageNumber,
+      perPage: itemsPerPage,
+      totalPages,
+      totalData: donationIds.length
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+router.get('/donation/get-all', corsMiddleware, async (req: Request, res: Response, next: NextFunction) => {
   const { page, perPage } = req.query;
   const pageNumber = parseInt(page as string) || 1;
   const itemsPerPage = parseInt(perPage as string) || 10;
