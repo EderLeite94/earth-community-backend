@@ -1,11 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.now = exports.DateNow = void 0;
-const DateNow = () => {
+exports.now = void 0;
+const now = () => {
     // Get current date/time in Brazil timezone
-    const now = new Date(new Date().getTime());
+    const now = new Date(new Date().getTime() - (3 * 60 * 60 * 1000));
     return now;
 };
-exports.DateNow = DateNow;
-exports.now = (0, exports.DateNow)(); // Exporting the current date/time as well
+exports.now = now;
 //# sourceMappingURL=index.js.map

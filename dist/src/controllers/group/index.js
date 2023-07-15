@@ -29,7 +29,7 @@ router.post('/group/create/:id', middlewares_1.default, async (req, res) => {
             _id: user._id,
             user: user
         },
-        createdAt: date_1.now
+        createdAt: (0, date_1.now)()
     };
     if (!name) {
         return res.status(422).json({ error: 'Preencha um nome!' });

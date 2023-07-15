@@ -35,7 +35,7 @@ router.post('/auth/user/sign-up', corsMiddleware, validateSignUp, async (req: Re
       security: {
         authWith,
         password: passwordHash,
-        accountCreateDate: now
+        accountCreateDate: now()
       }
     };
     // Insert user in database

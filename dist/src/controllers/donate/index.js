@@ -68,7 +68,7 @@ router.post('/donation/:userId?', index_5.default, async (req, res) => {
             transaction_amount,
             description,
             payment_method_id: "pix",
-            donateCreateDate: date_1.now,
+            donateCreateDate: (0, date_1.now)(),
             payer: {
                 user_id: userId || null,
                 email,
