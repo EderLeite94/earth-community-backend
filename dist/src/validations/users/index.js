@@ -71,7 +71,7 @@ const validateSignIn = async (req, res, next) => {
         // Check if password matches
         const checkPassword = await bcrypt_1.default.compare(password, user.security.password);
         if (!checkPassword) {
-            return res.status(422).json({ error: 'Senha inválida!' });
+            return res.status(422).json({ error: 'Usuário ou senha inválida!' });
         }
         // Fetch group information based on groupIds
         next();
